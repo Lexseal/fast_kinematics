@@ -17,7 +17,7 @@ They are the same for the translational part, but different for the rotational p
 7. https://github.com/UM-ARM-Lab/pytorch_kinematics
 
 ## First, do everything in CPU and compare the results to existing libraries.
-1. Set up the build system and include urdfdom and eigen properly.
+1. ~~Set up the build system and include urdfdom and eigen properly.~~
 2. Parese the panda urdf file and print out all the joint names, limits, origins, and axes.
 3. We will store all the information inside a kinematics tree. The tree will contain the joint names, limits, origins, types, and axis of roation or translation. It will also contain the parent and children.
 4. Then it is time to set up the forward kinematics using homogeneous transformation.
