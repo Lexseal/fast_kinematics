@@ -12,7 +12,7 @@ size_t find_num_of_joints(JointTreePtr tip) {
 }
 
 int main() {
-  std::string tip_name = "panda_hand_joint";
+  std::string eef_name = "panda_leftfinger";
   JointTreePtr root = Parser::parse("../panda.urdf"), tip;
   // print the joint tree using BFS
   std::queue<JointTreePtr> q;
@@ -30,7 +30,9 @@ int main() {
     for (auto &child : joint_tree->children) {
       q.push(child);
     }
-    if (joint_tree->name == tip_name) {
+    if (std::find(joint_tree->children_links.begin(),
+                  joint_tree->children_links.end(),
+                  eef_name) != joint_tree->children_links.end()) {
       tip = joint_tree;
     }
   }
@@ -45,13 +47,17 @@ int main() {
   Eigen::Quaterniond t = Eigen::Quaterniond(0, 0, 0, 0);
   JointTreePtr walker = tip;
   size_t num_of_joints = find_num_of_joints(tip);
-  std::vector<double> joint_values{0, 0.2, 0, -2.6, 0, 3.0, 0.8};
+  std::vector<double> joint_values{0, 0.2, 0, -2.6, 0, 3.0, 0.8, 0.03};
   while (walker) {
     if (walker->type == urdf::Joint::REVOLUTE) {
       // convert Eigen::AngleAxisd(joint_values[--num_of_joints], walker->axis) to quaternion
       Eigen::Quaterniond change = Eigen::Quaterniond(Eigen::AngleAxisd(joint_values[--num_of_joints], walker->axis));
       r = change * r;
       t = change * t * change.inverse();
+    } else if (walker->type == urdf::Joint::PRISMATIC) {
+      auto translation = joint_values[--num_of_joints] * walker->axis;
+      Eigen::Quaterniond change = Eigen::Quaterniond(0, translation.x(), translation.y(), translation.z());
+      t.coeffs() += change.coeffs();
     }
 
     r = walker->rotation * r;

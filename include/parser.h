@@ -14,6 +14,7 @@ struct JointTree {
   Eigen::Vector3d axis;
   std::shared_ptr<JointTree> parent;
   std::vector<std::shared_ptr<JointTree>> children;
+  std::vector<std::string> children_links;
 };
 using JointTreePtr = std::shared_ptr<JointTree>;
 
@@ -46,6 +47,7 @@ public:
       link_to_children[parent].push_back(joint_tree);
       assert(link_to_parent.count(child) == 0);  // do not support a link having multiple parents
       link_to_parent[child] = joint_tree;
+      joint_tree->children_links.push_back(child);
     }
 
     // connect the joint trees
