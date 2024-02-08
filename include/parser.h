@@ -9,9 +9,9 @@
 struct JointTree {
   std::string name;
   int type;
-  Eigen::Quaterniond rotation;
-  Eigen::Quaterniond position;
-  Eigen::Vector3d axis;
+  Eigen::Quaternionf rotation;
+  Eigen::Quaternionf position;
+  Eigen::Vector3f axis;
   std::shared_ptr<JointTree> parent;
   std::vector<std::shared_ptr<JointTree>> children;
   std::vector<std::string> children_links;
@@ -40,9 +40,9 @@ public:
       auto &rotation = joint.second->parent_to_joint_origin_transform.rotation;
       auto &position = joint.second->parent_to_joint_origin_transform.position;
       auto &axis = joint.second->axis;
-      joint_tree->rotation = Eigen::Quaterniond(rotation.w, rotation.x, rotation.y, rotation.z);
-      joint_tree->position = Eigen::Quaterniond(0, position.x, position.y, position.z);
-      joint_tree->axis = Eigen::Vector3d(axis.x, axis.y, axis.z);
+      joint_tree->rotation = Eigen::Quaternionf(rotation.w, rotation.x, rotation.y, rotation.z);
+      joint_tree->position = Eigen::Quaternionf(0, position.x, position.y, position.z);
+      joint_tree->axis = Eigen::Vector3f(axis.x, axis.y, axis.z);
       std::string parent = joint.second->parent_link_name, child = joint.second->child_link_name;
       link_to_children[parent].push_back(joint_tree);
       assert(link_to_parent.count(child) == 0);  // do not support a link having multiple parents
