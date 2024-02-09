@@ -18,7 +18,15 @@ They are the same for the translational part, but different for the rotational p
 
 ## First, do everything in CPU and compare the results to existing libraries.
 1. ~~Set up the build system and include urdfdom and eigen properly.~~
-2. Parese the panda urdf file and print out all the joint names, limits, origins, and axes.
-3. We will store all the information inside a kinematics tree. The tree will contain the joint names, limits, origins, types, and axis of roation or translation. It will also contain the parent and children.
-4. Then it is time to set up the forward kinematics using homogeneous transformation.
-5. After that we will set up the forward kinematics using quaternion. We will need to treat the rotation and translation separately.
+2. ~~Parese the panda urdf file and print out all the joint names, limits, origins, and axes.~~
+3. ~~We will store all the information inside a kinematics tree. The tree will contain the joint names, limits, origins, types, and axis of roation or translation. It will also contain the parent and children.~~
+4. ~~Then it is time to set up the forward kinematics using homogeneous transformation.~~
+5. ~~After that we will set up the forward kinematics using quaternion. We will need to treat the rotation and translation separately.~~
+6. ~~Jacobian calculation~~
+7. ~~Make implementation parallel~~
+8. Transfer to GPU
+
+Memory layout:
+data consists of [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats), ...]
+control consists of [angle for first joint, angle for second joint, ...]
+two other arrays to specify cumulative number of joints for each robot and cumulative number of active joints for each robot

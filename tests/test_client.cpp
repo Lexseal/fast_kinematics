@@ -1,6 +1,6 @@
 #include <queue>
 #include <parser.h>
-#include <fk.h>
+#include <kinematics.h>
 #include <thread>
 #include <chrono>
 
@@ -138,7 +138,7 @@ int main() {
   // for (size_t i = 0; i < 11 * find_num_of_joints(tip) * num_of_robots; ++i) {
   //   std::cout << data[i] << std::endl;
   // }
-  std::cout << forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3) << std::endl;
+  std::cout << jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3) << std::endl;
 
   // use multiple threads to do the forward kinematics
   // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
