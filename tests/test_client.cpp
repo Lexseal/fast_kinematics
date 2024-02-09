@@ -1,6 +1,8 @@
 #include <queue>
 #include <parser.h>
 #include <fk.h>
+#include <thread>
+#include <chrono>
 
 size_t find_num_of_active_joints(JointTreePtr tip) {
   size_t num_of_active_joints = 0;
@@ -85,7 +87,10 @@ int main() {
 
   // data structure
   // [type (1 float), axis (3 floats), rotation (4 floats), translation (3 floats)]
-  float *data = new float[11 * find_num_of_joints(tip)];
+  
+  size_t num_of_robots = 10000;
+
+  float *data = new float[11 * find_num_of_joints(tip) * num_of_robots];
   walker = tip;
   size_t idx = 0;
   while (walker) {
@@ -102,8 +107,57 @@ int main() {
     data[idx++] = walker->position.z();
     walker = walker->parent;
   }
-  float angs[] = {0, 0.2, 0, -2.6, 0, 3.0, 0.8, 0.03};
-  std::cout << forward_kinematics(data, angs, find_num_of_joints(tip), find_num_of_active_joints(tip), 0) << std::endl;
+  for (size_t i = 1; i < num_of_robots; ++i) {
+    memcpy(data + i*11*find_num_of_joints(tip), data, 11*find_num_of_joints(tip)*sizeof(float));
+  }
+  float *angs = new float[8*num_of_robots];
+  //  = {0, 0.2, 0, -2.6, 0, 3.0, 0.8, 0.03}
+  angs[0] = 0;
+  angs[1] = 0.2;
+  angs[2] = 0;
+  angs[3] = -2.6;
+  angs[4] = 0;
+  angs[5] = 3.0;
+  angs[6] = 0.8;
+  angs[7] = 0.03;
+  for (size_t i = 0; i < num_of_robots; ++i) {
+    memcpy(angs + i*8, angs, 8*sizeof(float));
+  }
+  size_t *num_of_joints_cum = new size_t[num_of_robots];
+  num_of_joints_cum[0] = find_num_of_joints(tip)*11;
+  for (size_t i = 1; i < num_of_robots; ++i) {
+    num_of_joints_cum[i] = num_of_joints_cum[i - 1] + find_num_of_joints(tip)*11;
+  }
+  size_t *num_of_active_joints_cum = new size_t[num_of_robots];
+  num_of_active_joints_cum[0] = find_num_of_active_joints(tip);
+  for (size_t i = 1; i < num_of_robots; ++i) {
+    num_of_active_joints_cum[i] = num_of_active_joints_cum[i - 1] + find_num_of_active_joints(tip);
+  }
+  // std::cout << forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, 4) << std::endl;
+
+  // use multiple threads to do the forward kinematics
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+  std::vector<std::thread> threads;
+  std::vector<Eigen::Matrix<float, 7, 1>> results(num_of_robots);
+  for (size_t i = 0; i < num_of_robots; ++i) {
+    threads.push_back(std::thread([=, &results](){
+      results[i] = forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, i);
+    }));
+  }
+
+  for (auto &thread : threads) {
+    thread.join();
+  }
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+  std::cout << "The time it takes to do the forward kinematics for " << num_of_robots << " robots is: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
+
+  // use single thread to do the forward kinematics
+  start = std::chrono::high_resolution_clock::now();
+  for (size_t i = 0; i < num_of_robots; ++i) {
+    results[i] = forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, i);
+  }
+  end = std::chrono::high_resolution_clock::now();
+  std::cout << "The time it takes to do the forward kinematics for " << num_of_robots << " robots is: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
 
   return 0;
 }

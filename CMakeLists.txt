@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g3 -Wall -Werror -fsized-deallocation -Wno-deprecated-declarations")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2")
 
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
