@@ -138,9 +138,16 @@ int main() {
   // for (size_t i = 0; i < 11 * find_num_of_joints(tip) * num_of_robots; ++i) {
   //   std::cout << data[i] << std::endl;
   // }
-  float *result = forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3);
-  for (size_t i = 0; i < 7; ++i) {
-    std::cout << result[i] << std::endl;
+  float **result = jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3);
+  // for (size_t i = 0; i < 7; ++i) {
+  //   std::cout << result[i] << std::endl;
+  // }
+
+  for (size_t i = 0; i < 6; ++i) {
+    for (size_t j = 0; j < num_of_active_joints_cum[3]-num_of_active_joints_cum[2]; ++j) {
+      std::cout << result[i][j] << " ";
+    }
+    std::cout << std::endl;
   }
 
   // use multiple threads to do the forward kinematics
