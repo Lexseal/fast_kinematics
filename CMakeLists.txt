@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.12)
-project(fast_kinematics LANGUAGES CXX)
+project(fast_kinematics LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g3 -Wall -Werror -fsized-deallocation -Wno-deprecated-declarations")
@@ -16,5 +16,7 @@ include_directories(${inc_dir})
 include_directories(${urdfdom_INCLUDE_DIRS})
 include_directories(include)
 
+set_source_files_properties(tests/test_client.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(test_client tests/test_client.cpp)
+target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012)
 target_link_libraries(test_client ${urdfdom_LIBRARIES})

@@ -4,22 +4,22 @@
 
 class Quaternion {
 public:
-  /*__host__ __device__*/ Quaternion(float w = 1.0f, float x = 0.0f, float y = 0.0f, float z = 0.0f)
+  __host__ __device__ Quaternion(float w = 1.0f, float x = 0.0f, float y = 0.0f, float z = 0.0f)
     : w(w), x(x), y(y), z(z) {}
 
-  /*__host__ __device__*/ float norm() const {
+  __host__ __device__ float norm() const {
     return std::sqrt(w * w + x * x + y * y + z * z);
   }
 
-  /*__host__ __device__*/ Quaternion conjugate() const {
+  __host__ __device__ Quaternion conjugate() const {
     return Quaternion(w, -x, -y, -z);
   }
 
-  /*__host__ __device__*/ Quaternion operator+(const Quaternion& other) const {
+  __host__ __device__ Quaternion operator+(const Quaternion& other) const {
     return Quaternion(w + other.w, x + other.x, y + other.y, z + other.z);
   }
 
-  /*__host__ __device__*/ Quaternion operator*(const Quaternion& other) const {
+  __host__ __device__ Quaternion operator*(const Quaternion& other) const {
     float nw = w * other.w - x * other.x - y * other.y - z * other.z;
     float nx = w * other.x + x * other.w + y * other.z - z * other.y;
     float ny = w * other.y - x * other.z + y * other.w + z * other.x;
@@ -27,15 +27,15 @@ public:
     return Quaternion(nw, nx, ny, nz);
   }
 
-  /*__host__ __device__*/ Quaternion operator*(float scalar) const {
+  __host__ __device__ Quaternion operator*(float scalar) const {
     return Quaternion(w * scalar, x * scalar, y * scalar, z * scalar);
   }
 
-  /*__host__ __device__*/ Quaternion operator/(float scalar) const {
+  __host__ __device__ Quaternion operator/(float scalar) const {
     return Quaternion(w / scalar, x / scalar, y / scalar, z / scalar);
   }
 
-  /*__host__ __device__*/ Quaternion& operator+=(const Quaternion& other) {
+  __host__ __device__ Quaternion& operator+=(const Quaternion& other) {
     w += other.w;
     x += other.x;
     y += other.y;
@@ -43,7 +43,7 @@ public:
     return *this;
   }
 
-  /*__host__ __device__*/ Quaternion& operator*=(const Quaternion& other) {
+  __host__ __device__ Quaternion& operator*=(const Quaternion& other) {
     float nw = w * other.w - x * other.x - y * other.y - z * other.z;
     float nx = w * other.x + x * other.w + y * other.z - z * other.y;
     float ny = w * other.y - x * other.z + y * other.w + z * other.x;
@@ -55,7 +55,7 @@ public:
     return *this;
   }
 
-  /*__host__ __device__*/ Quaternion& operator*=(float scalar) {
+  __host__ __device__ Quaternion& operator*=(float scalar) {
     w *= scalar;
     x *= scalar;
     y *= scalar;
@@ -63,7 +63,7 @@ public:
     return *this;
   }
 
-  /*__host__ __device__*/ Quaternion& operator/=(float scalar) {
+  __host__ __device__ Quaternion& operator/=(float scalar) {
     w /= scalar;
     x /= scalar;
     y /= scalar;
@@ -71,7 +71,7 @@ public:
     return *this;
   }
 
-  /*__host__ __device__*/ void normalize() {
+  __host__ __device__ void normalize() {
     float n = norm();
     w /= n;
     x /= n;
@@ -79,12 +79,12 @@ public:
     z /= n;
   }
 
-  /*__host__ __device__*/ Quaternion normalized() const {
+  __host__ __device__ Quaternion normalized() const {
     float n = norm();
     return Quaternion(w / n, x / n, y / n, z / n);
   }
 
-  /*__host__ __device__*/ Quaternion inverse() const {
+  __host__ __device__ Quaternion inverse() const {
     return conjugate() / (w * w + x * x + y * y + z * z);
   }
 
