@@ -90,44 +90,44 @@ int main() {
   
   size_t num_of_robots = 4;
 
-  float *data = new float[11 * find_num_of_joints(tip) * num_of_robots];
+  float *h_data = new float[11 * find_num_of_joints(tip) * num_of_robots];
   walker = tip;
   size_t idx = 11 * find_num_of_joints(tip) * num_of_robots;
   while (walker) {
-    data[--idx] = walker->axis.z();
-    data[--idx] = walker->axis.y();
-    data[--idx] = walker->axis.x();
-    data[--idx] = walker->type;
-    data[--idx] = walker->rotation.coeffs().z();
-    data[--idx] = walker->rotation.coeffs().y();
-    data[--idx] = walker->rotation.coeffs().x();
-    data[--idx] = walker->rotation.coeffs().w();
-    data[--idx] = walker->position.z();
-    data[--idx] = walker->position.y();
-    data[--idx] = walker->position.x();
+    h_data[--idx] = walker->axis.z();
+    h_data[--idx] = walker->axis.y();
+    h_data[--idx] = walker->axis.x();
+    h_data[--idx] = walker->type;
+    h_data[--idx] = walker->rotation.coeffs().z();
+    h_data[--idx] = walker->rotation.coeffs().y();
+    h_data[--idx] = walker->rotation.coeffs().x();
+    h_data[--idx] = walker->rotation.coeffs().w();
+    h_data[--idx] = walker->position.z();
+    h_data[--idx] = walker->position.y();
+    h_data[--idx] = walker->position.x();
     walker = walker->parent;
   }
   for (size_t i = 0; i < num_of_robots-1; ++i) {
-    memcpy(data + i*11*find_num_of_joints(tip),
-           data + (num_of_robots-1)*11*find_num_of_joints(tip), 11*find_num_of_joints(tip)*sizeof(float));
+    memcpy(h_data + i*11*find_num_of_joints(tip),
+           h_data + (num_of_robots-1)*11*find_num_of_joints(tip), 11*find_num_of_joints(tip)*sizeof(float));
   }
-  float *angs = new float[8*num_of_robots];
+  float *h_angs = new float[8*num_of_robots];
   //  = {0, 0.2, 0, -2.6, 0, 3.0, 0.8, 0.03}
-  angs[0] = 0;
-  angs[1] = 0.2;
-  angs[2] = 0;
-  angs[3] = -2.6;
-  angs[4] = 0;
-  angs[5] = 3.0;
-  angs[6] = 0.8;
-  angs[7] = 0.03;
+  h_angs[0] = 0;
+  h_angs[1] = 0.2;
+  h_angs[2] = 0;
+  h_angs[3] = -2.6;
+  h_angs[4] = 0;
+  h_angs[5] = 3.0;
+  h_angs[6] = 0.8;
+  h_angs[7] = 0.03;
   for (size_t i = 0; i < num_of_robots; ++i) {
-    memcpy(angs + i*8, angs, 8*sizeof(float));
+    memcpy(h_angs + i*8, h_angs, 8*sizeof(float));
   }
-  size_t *num_of_joints_cum = new size_t[num_of_robots];
-  num_of_joints_cum[0] = find_num_of_joints(tip)*11;
+  size_t *h_num_of_joints_cum = new size_t[num_of_robots];
+  h_num_of_joints_cum[0] = find_num_of_joints(tip)*11;
   for (size_t i = 1; i < num_of_robots; ++i) {
-    num_of_joints_cum[i] = num_of_joints_cum[i - 1] + find_num_of_joints(tip)*11;
+    h_num_of_joints_cum[i] = h_num_of_joints_cum[i - 1] + find_num_of_joints(tip)*11;
   }
   size_t *num_of_active_joints_cum = new size_t[num_of_robots];
   num_of_active_joints_cum[0] = find_num_of_active_joints(tip);
@@ -135,48 +135,41 @@ int main() {
     num_of_active_joints_cum[i] = num_of_active_joints_cum[i - 1] + find_num_of_active_joints(tip);
   }
   
-  // for (size_t i = 0; i < 11 * find_num_of_joints(tip) * num_of_robots; ++i) {
-  //   std::cout << data[i] << std::endl;
-  // }
-  float **result = new float*[6];
+  float **h_result = new float*[6];
   for (size_t i = 0; i < 6; ++i) {
-    result[i] = new float[num_of_active_joints_cum[num_of_robots-1]]{0};
+    h_result[i] = new float[num_of_active_joints_cum[num_of_robots-1]]{0};
   }
-  jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3, result);
-  // for (size_t i = 0; i < 7; ++i) {
-  //   std::cout << result[i] << std::endl;
-  // }
+
+  float *d_data, *d_angs, **d_result;
+  size_t *d_num_of_joints_cum, *d_num_of_active_joints_cum;
+  cudaMalloc(&d_data, 11 * find_num_of_joints(tip) * num_of_robots * sizeof(float));
+  cudaMalloc(&d_angs, 8 * num_of_robots * sizeof(float));
+  cudaMalloc(&d_num_of_joints_cum, num_of_robots * sizeof(size_t));
+  cudaMalloc(&d_num_of_active_joints_cum, num_of_robots * sizeof(size_t));
+  cudaMalloc(&d_result, 6 * sizeof(float*));
+  for (size_t i = 0; i < 6; ++i) {
+    cudaMalloc(&d_result[i], num_of_active_joints_cum[num_of_robots-1] * sizeof(float));
+  }
+
+  cudaMemcpy(d_data, h_data, 11 * find_num_of_joints(tip) * num_of_robots * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_angs, h_angs, 8 * num_of_robots * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_num_of_joints_cum, h_num_of_joints_cum, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_num_of_active_joints_cum, num_of_active_joints_cum, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_result, h_result, 6 * sizeof(float*), cudaMemcpyHostToDevice);
+
+  // jacobian(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, 3, d_result);
+  dim3 grid(1);
+  dim3 block(num_of_robots);
+  jacobian<<<grid, block>>>(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, 3, d_result);
+
+  cudaMemcpy(h_result[0], d_result[0], num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyDeviceToHost);
 
   for (size_t i = 0; i < 6; ++i) {
     for (size_t j = num_of_active_joints_cum[2]; j < num_of_active_joints_cum[3]; ++j) {
-      std::cout << result[i][j] << " ";
+      std::cout << h_result[i][j] << " ";
     }
     std::cout << std::endl;
   }
-
-  // use multiple threads to do the forward kinematics
-  // std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-  // std::vector<std::thread> threads;
-  // std::vector<Eigen::Matrix<float, 7, 1>> results(num_of_robots);
-  // for (size_t i = 0; i < num_of_robots; ++i) {
-  //   threads.push_back(std::thread([=, &results](){
-  //     results[i] = forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, i);
-  //   }));
-  // }
-
-  // for (auto &thread : threads) {
-  //   thread.join();
-  // }
-  // std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
-  // std::cout << "The time it takes to do the forward kinematics for " << num_of_robots << " robots is: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
-
-  // // use single thread to do the forward kinematics
-  // start = std::chrono::high_resolution_clock::now();
-  // for (size_t i = 0; i < num_of_robots; ++i) {
-  //   results[i] = forward_kinematics(data, angs, num_of_joints_cum, num_of_active_joints_cum, i);
-  // }
-  // end = std::chrono::high_resolution_clock::now();
-  // std::cout << "The time it takes to do the forward kinematics for " << num_of_robots << " robots is: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
 
   return 0;
 }

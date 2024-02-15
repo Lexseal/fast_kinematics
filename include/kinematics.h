@@ -7,8 +7,9 @@
 // data structure
 // [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats)]
 
-void forward_kinematics(float *data, float *angs, size_t *num_joints_cum,
-                        size_t *num_of_active_joints_cum, size_t idx, float *result) {
+__global__ void forward_kinematics(float *data, float *angs, size_t *num_joints_cum,
+                        size_t *num_of_active_joints_cum, float *result) {
+  size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   size_t end_idx = num_joints_cum[idx];
   size_t ang_idx = idx == 0 ? 0 : num_of_active_joints_cum[idx - 1];
   size_t data_idx = 0;
@@ -66,8 +67,9 @@ void forward_kinematics(float *data, float *angs, size_t *num_joints_cum,
   result[idx*7+6] = r.z;
 }
 
-void jacobian(float *data, float *angs, size_t *num_joints_cum,
-              size_t *num_of_active_joints_cum, size_t idx, float **result) {
+__global__ void jacobian(float *data, float *angs, size_t *num_joints_cum,
+              size_t *num_of_active_joints_cum, float **result) {
+  size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   size_t end_idx = num_joints_cum[idx];
   size_t ang_idx = idx == 0 ? 0 : num_of_active_joints_cum[idx - 1];
   size_t data_idx = 0;
