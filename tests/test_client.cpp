@@ -138,13 +138,17 @@ int main() {
   // for (size_t i = 0; i < 11 * find_num_of_joints(tip) * num_of_robots; ++i) {
   //   std::cout << data[i] << std::endl;
   // }
-  float **result = jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3);
+  float **result = new float*[6];
+  for (size_t i = 0; i < 6; ++i) {
+    result[i] = new float[num_of_active_joints_cum[num_of_robots-1]]{0};
+  }
+  jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3, result);
   // for (size_t i = 0; i < 7; ++i) {
   //   std::cout << result[i] << std::endl;
   // }
 
   for (size_t i = 0; i < 6; ++i) {
-    for (size_t j = 0; j < num_of_active_joints_cum[3]-num_of_active_joints_cum[2]; ++j) {
+    for (size_t j = num_of_active_joints_cum[2]; j < num_of_active_joints_cum[3]; ++j) {
       std::cout << result[i][j] << " ";
     }
     std::cout << std::endl;
