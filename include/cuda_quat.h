@@ -88,11 +88,11 @@ public:
     return conjugate() / (w * w + x * x + y * y + z * z);
   }
 
-  static Quaternion Identity() {
+  __host__ __device__ static Quaternion Identity() {
     return Quaternion(1.0f, 0.0f, 0.0f, 0.0f);
   }
 
-  static Quaternion FromAngleAxis(float angle, float x, float y, float z) {
+  __host__ __device__ static Quaternion FromAngleAxis(float angle, float x, float y, float z) {
     float halfAngle = angle / 2;
     float s = std::sin(halfAngle);
     return Quaternion(std::cos(halfAngle), x * s, y * s, z * s);

@@ -88,7 +88,7 @@ int main() {
   // data structure
   // [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats)]
   
-  size_t num_of_robots = 4;
+  size_t num_of_robots = 10000;
 
   float *h_data = new float[11 * find_num_of_joints(tip) * num_of_robots];
   walker = tip;
@@ -124,49 +124,47 @@ int main() {
   for (size_t i = 0; i < num_of_robots; ++i) {
     memcpy(h_angs + i*8, h_angs, 8*sizeof(float));
   }
-  size_t *h_num_of_joints_cum = new size_t[num_of_robots];
-  h_num_of_joints_cum[0] = find_num_of_joints(tip)*11;
+  size_t *h_num_of_data_cum = new size_t[num_of_robots];
+  h_num_of_data_cum[0] = find_num_of_joints(tip)*11;
   for (size_t i = 1; i < num_of_robots; ++i) {
-    h_num_of_joints_cum[i] = h_num_of_joints_cum[i - 1] + find_num_of_joints(tip)*11;
+    h_num_of_data_cum[i] = h_num_of_data_cum[i - 1] + find_num_of_joints(tip)*11;
   }
-  size_t *num_of_active_joints_cum = new size_t[num_of_robots];
-  num_of_active_joints_cum[0] = find_num_of_active_joints(tip);
+  size_t *h_num_of_active_joints_cum = new size_t[num_of_robots];
+  h_num_of_active_joints_cum[0] = find_num_of_active_joints(tip);
   for (size_t i = 1; i < num_of_robots; ++i) {
-    num_of_active_joints_cum[i] = num_of_active_joints_cum[i - 1] + find_num_of_active_joints(tip);
+    h_num_of_active_joints_cum[i] = h_num_of_active_joints_cum[i - 1] + find_num_of_active_joints(tip);
   }
   
-  float **h_result = new float*[6];
-  for (size_t i = 0; i < 6; ++i) {
-    h_result[i] = new float[num_of_active_joints_cum[num_of_robots-1]]{0};
-  }
+  float *h_result = new float[6*h_num_of_active_joints_cum[num_of_robots-1]]{0};
 
-  float *d_data, *d_angs, **d_result;
+  float *d_data, *d_angs, *d_result;
   size_t *d_num_of_joints_cum, *d_num_of_active_joints_cum;
-  cudaMalloc(&d_data, 11 * find_num_of_joints(tip) * num_of_robots * sizeof(float));
-  cudaMalloc(&d_angs, 8 * num_of_robots * sizeof(float));
+  cudaMalloc(&d_data, h_num_of_data_cum[num_of_robots-1] * sizeof(float));
+  cudaMalloc(&d_angs, h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float));
+  cudaMalloc(&d_result, 6*h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float));
   cudaMalloc(&d_num_of_joints_cum, num_of_robots * sizeof(size_t));
   cudaMalloc(&d_num_of_active_joints_cum, num_of_robots * sizeof(size_t));
-  cudaMalloc(&d_result, 6 * sizeof(float*));
-  for (size_t i = 0; i < 6; ++i) {
-    cudaMalloc(&d_result[i], num_of_active_joints_cum[num_of_robots-1] * sizeof(float));
-  }
 
-  cudaMemcpy(d_data, h_data, 11 * find_num_of_joints(tip) * num_of_robots * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_angs, h_angs, 8 * num_of_robots * sizeof(float), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_num_of_joints_cum, h_num_of_joints_cum, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_num_of_active_joints_cum, num_of_active_joints_cum, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
-  cudaMemcpy(d_result, h_result, 6 * sizeof(float*), cudaMemcpyHostToDevice);
+  std::cout << "memory assigned" << std::endl;
+
+  cudaMemcpy(d_data, h_data, h_num_of_data_cum[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_angs, h_angs, h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_num_of_joints_cum, h_num_of_data_cum, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_num_of_active_joints_cum, h_num_of_active_joints_cum, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
+  cudaMemcpy(d_result, h_result, 6*h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
+
+  std::cout << "memory copied" << std::endl;
 
   // jacobian(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, 3, d_result);
-  dim3 grid(1);
-  dim3 block(num_of_robots);
-  jacobian<<<grid, block>>>(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, 3, d_result);
+  dim3 grid((num_of_robots+1023)/1024);
+  dim3 block(1024);
+  jacobian<<<grid, block>>>(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
 
-  cudaMemcpy(h_result[0], d_result[0], num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyDeviceToHost);
+  cudaMemcpy(h_result, d_result, 6*h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyDeviceToHost);
 
   for (size_t i = 0; i < 6; ++i) {
-    for (size_t j = num_of_active_joints_cum[2]; j < num_of_active_joints_cum[3]; ++j) {
-      std::cout << h_result[i][j] << " ";
+    for (size_t j = h_num_of_active_joints_cum[9998]; j < h_num_of_active_joints_cum[9999]; ++j) {
+      std::cout << h_result[j*6+i] << " ";
     }
     std::cout << std::endl;
   }
