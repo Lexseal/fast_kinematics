@@ -30,3 +30,7 @@ Memory layout:
 data consists of [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats), ...]
 control consists of [angle for first joint, angle for second joint, ...]
 two other arrays to specify cumulative number of joints for each robot and cumulative number of active joints for each robot
+
+## Benchmarks
+
+The time it takes to calculate 10000 Jacobians in parallel (including the memory copy time but not including the data prepreation time) is ~2ms on m4000. The same calculation takes ~3.2ms on an M1 and ~9ms on E5-2623 single core.

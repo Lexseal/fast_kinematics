@@ -125,11 +125,11 @@ __global__ void jacobian(float *data, float *angs, size_t *num_data_cum,
     Quaternion axis_quat(0, axis[0], axis[1], axis[2]);
     axis_quat = r * axis_quat * r.inverse();
     result[6*ang_idx+0] = -axis_quat.y*t.z + axis_quat.z*t.y;
-      result[6*ang_idx+1] = axis_quat.x*t.z - axis_quat.z*t.x;
-      result[6*ang_idx+2] = -axis_quat.x*t.y + axis_quat.y*t.x;
-      result[6*ang_idx+3] = axis_quat.x;
-      result[6*ang_idx+4] = axis_quat.y;
-      result[6*ang_idx+5] = axis_quat.z;
+    result[6*ang_idx+1] = axis_quat.x*t.z - axis_quat.z*t.x;
+    result[6*ang_idx+2] = -axis_quat.x*t.y + axis_quat.y*t.x;
+    result[6*ang_idx+3] = axis_quat.x;
+    result[6*ang_idx+4] = axis_quat.y;
+    result[6*ang_idx+5] = axis_quat.z;
     Quaternion change = Quaternion::FromAngleAxis(angs[ang_idx++], axis[0], axis[1], axis[2]);
     r = r * change;
   } else if (type == urdf::Joint::PRISMATIC) {

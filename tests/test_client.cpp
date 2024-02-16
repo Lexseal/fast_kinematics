@@ -146,6 +146,7 @@ int main() {
   cudaMalloc(&d_num_of_active_joints_cum, num_of_robots * sizeof(size_t));
 
   std::cout << "memory assigned" << std::endl;
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
 
   cudaMemcpy(d_data, h_data, h_num_of_data_cum[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
   cudaMemcpy(d_angs, h_angs, h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
@@ -162,6 +163,9 @@ int main() {
 
   cudaMemcpy(h_result, d_result, 6*h_num_of_active_joints_cum[num_of_robots-1] * sizeof(float), cudaMemcpyDeviceToHost);
 
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+  std::cout << "The time to copy data and for the kernel to run on a size 10000 is: " << time_span.count() << " seconds." << std::endl;
   for (size_t i = 0; i < 6; ++i) {
     for (size_t j = h_num_of_active_joints_cum[9998]; j < h_num_of_active_joints_cum[9999]; ++j) {
       std::cout << h_result[j*6+i] << " ";

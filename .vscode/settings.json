@@ -78,6 +78,7 @@
     "variant": "cpp",
     "vector": "cpp",
     "geometry": "cpp",
-    "core": "cpp"
+    "core": "cpp",
+    "functional": "cpp"
   }
 }
