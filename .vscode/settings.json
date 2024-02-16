@@ -79,6 +79,7 @@
     "vector": "cpp",
     "geometry": "cpp",
     "core": "cpp",
-    "functional": "cpp"
+    "functional": "cpp",
+    "chrono": "cpp"
   }
 }
