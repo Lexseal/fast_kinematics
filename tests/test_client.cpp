@@ -88,7 +88,7 @@ int main() {
   // data structure
   // [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats)]
   
-  size_t num_of_robots = 4;
+  size_t num_of_robots = 10000;
 
   float *data = new float[11 * find_num_of_joints(tip) * num_of_robots];
   walker = tip;
@@ -138,10 +138,16 @@ int main() {
   // for (size_t i = 0; i < 11 * find_num_of_joints(tip) * num_of_robots; ++i) {
   //   std::cout << data[i] << std::endl;
   // }
-  float **result = jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3);
+  float **result;
+  std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+  for (int i = 0; i < 10000; ++i)
+    result = jacobian(data, angs, num_of_joints_cum, num_of_active_joints_cum, 3);
   // for (size_t i = 0; i < 7; ++i) {
   //   std::cout << result[i] << std::endl;
   // }
+  std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+  std::chrono::duration<double> time_span = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+  std::cout << "The time it takes to do the jacobian for " << num_of_robots << " robots is: " << time_span.count() << " s" << std::endl;
 
   for (size_t i = 0; i < 6; ++i) {
     for (size_t j = 0; j < num_of_active_joints_cum[3]-num_of_active_joints_cum[2]; ++j) {
