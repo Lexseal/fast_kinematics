@@ -7,7 +7,7 @@
 // data structure
 // [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats)]
 
-__global__ void forward_kinematics(float *data, float *angs, size_t *cum_data_idx,
+__global__ void _forward_kinematics(float *data, float *angs, size_t *cum_data_idx,
                         size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
   size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= num_of_robots) return;
@@ -68,7 +68,7 @@ __global__ void forward_kinematics(float *data, float *angs, size_t *cum_data_id
   result[idx*7+6] = r.z;
 }
 
-__global__ void jacobian(float *data, float *angs, size_t *cum_data_idx,
+__global__ void _jacobian(float *data, float *angs, size_t *cum_data_idx,
               size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
   size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= num_of_robots) return;
@@ -106,6 +106,9 @@ __global__ void jacobian(float *data, float *angs, size_t *cum_data_idx,
       result[6*ang_idx+0] = rotated_axis.x;
       result[6*ang_idx+1] = rotated_axis.y;
       result[6*ang_idx+2] = rotated_axis.z;
+      result[6*ang_idx+3] = 0;
+      result[6*ang_idx+4] = 0;
+      result[6*ang_idx+5] = 0;
       float displacement = angs[ang_idx++];
       nxt_translation += axis_quat*displacement;
     }
@@ -138,6 +141,9 @@ __global__ void jacobian(float *data, float *angs, size_t *cum_data_idx,
     result[6*ang_idx+0] = rotated_axis.x;
     result[6*ang_idx+1] = rotated_axis.y;
     result[6*ang_idx+2] = rotated_axis.z;
+    result[6*ang_idx+3] = 0;
+    result[6*ang_idx+4] = 0;
+    result[6*ang_idx+5] = 0;
     float displacement = angs[ang_idx++];
     nxt_translation += axis_quat*displacement;
   }
@@ -145,7 +151,7 @@ __global__ void jacobian(float *data, float *angs, size_t *cum_data_idx,
   t += nxt_translation;
 }
 
-__global__ void jacobian_mixed_frame(float *data, float *angs, size_t *cum_data_idx,
+__global__ void _jacobian_mixed_frame(float *data, float *angs, size_t *cum_data_idx,
   size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
   size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= num_of_robots) return;
@@ -185,6 +191,9 @@ __global__ void jacobian_mixed_frame(float *data, float *angs, size_t *cum_data_
       result[6*ang_idx+0] = rotated_axis.x;
       result[6*ang_idx+1] = rotated_axis.y;
       result[6*ang_idx+2] = rotated_axis.z;
+      result[6*ang_idx+3] = 0;
+      result[6*ang_idx+4] = 0;
+      result[6*ang_idx+5] = 0;
       float displacement = angs[ang_idx++];
       nxt_translation += axis_quat*displacement;
     }
@@ -217,6 +226,9 @@ __global__ void jacobian_mixed_frame(float *data, float *angs, size_t *cum_data_
     result[6*ang_idx+0] = rotated_axis.x;
     result[6*ang_idx+1] = rotated_axis.y;
     result[6*ang_idx+2] = rotated_axis.z;
+    result[6*ang_idx+3] = 0;
+    result[6*ang_idx+4] = 0;
+    result[6*ang_idx+5] = 0;
     float displacement = angs[ang_idx++];
     nxt_translation += axis_quat*displacement;
   }
