@@ -80,6 +80,16 @@
     "geometry": "cpp",
     "core": "cpp",
     "functional": "cpp",
-    "chrono": "cpp"
+    "chrono": "cpp",
+    "bit": "cpp",
+    "*.tcc": "cpp",
+    "iterator": "cpp",
+    "memory": "cpp",
+    "memory_resource": "cpp",
+    "numeric": "cpp",
+    "random": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "cinttypes": "cpp"
   }
 }

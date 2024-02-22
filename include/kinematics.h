@@ -7,14 +7,14 @@
 // data structure
 // [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats)]
 
-__global__ void forward_kinematics(float *data, float *angs, size_t *num_data_cum,
-                        size_t *num_of_active_joints_cum, float *result, size_t num_of_robots) {
+__global__ void forward_kinematics(float *data, float *angs, size_t *cum_data_idx,
+                        size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
   size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= num_of_robots) return;
-  size_t end_idx = num_data_cum[idx];
-  size_t ang_idx = idx == 0 ? 0 : num_of_active_joints_cum[idx - 1];
+  size_t end_idx = cum_data_idx[idx];
+  size_t ang_idx = idx == 0 ? 0 : cum_active_joint_idx[idx - 1];
   size_t data_idx = 0;
-  if (idx > 0) data_idx = num_data_cum[idx - 1];
+  if (idx > 0) data_idx = cum_data_idx[idx - 1];
   Quaternion r = Quaternion::Identity();
   Quaternion t(0, data[data_idx], data[data_idx+1], data[data_idx+2]);
   data_idx += 3;
@@ -68,14 +68,14 @@ __global__ void forward_kinematics(float *data, float *angs, size_t *num_data_cu
   result[idx*7+6] = r.z;
 }
 
-__global__ void jacobian(float *data, float *angs, size_t *num_data_cum,
-              size_t *num_of_active_joints_cum, float *result, size_t num_of_robots) {
+__global__ void jacobian(float *data, float *angs, size_t *cum_data_idx,
+              size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
   size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= num_of_robots) return;
-  size_t end_idx = num_data_cum[idx];
-  size_t ang_idx = idx == 0 ? 0 : num_of_active_joints_cum[idx - 1];
+  size_t end_idx = cum_data_idx[idx];
+  size_t ang_idx = idx == 0 ? 0 : cum_active_joint_idx[idx - 1];
   size_t data_idx = 0;
-  if (idx > 0) data_idx = num_data_cum[idx - 1];
+  if (idx > 0) data_idx = cum_data_idx[idx - 1];
   Quaternion r = Quaternion::Identity();
   Quaternion t(0, data[data_idx], data[data_idx+1], data[data_idx+2]);
   data_idx += 3;
@@ -145,15 +145,15 @@ __global__ void jacobian(float *data, float *angs, size_t *num_data_cum,
   t += nxt_translation;
 }
 
-__global__ void jacobian_mixed_frame(float *data, float *angs, size_t *num_data_cum,
-  size_t *num_of_active_joints_cum, float *result, size_t num_of_robots) {
+__global__ void jacobian_mixed_frame(float *data, float *angs, size_t *cum_data_idx,
+  size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
   size_t idx = blockIdx.x * blockDim.x + threadIdx.x;
   if (idx >= num_of_robots) return;
-  size_t end_idx = num_data_cum[idx];
-  size_t start_ang_idx = idx == 0 ? 0 : num_of_active_joints_cum[idx - 1];
+  size_t end_idx = cum_data_idx[idx];
+  size_t start_ang_idx = idx == 0 ? 0 : cum_active_joint_idx[idx - 1];
   size_t ang_idx = start_ang_idx;
   size_t data_idx = 0;
-  if (idx > 0) data_idx = num_data_cum[idx - 1];
+  if (idx > 0) data_idx = cum_data_idx[idx - 1];
   Quaternion r = Quaternion::Identity();
   Quaternion t(0, data[data_idx], data[data_idx+1], data[data_idx+2]);
   data_idx += 3;
@@ -170,6 +170,10 @@ __global__ void jacobian_mixed_frame(float *data, float *angs, size_t *num_data_
     if (type == urdf::Joint::REVOLUTE) {
       Quaternion axis_quat(0, axis[0], axis[1], axis[2]);
       axis_quat = r * axis_quat * r.inverse();
+      // temporarily store the translation in the jacobian matrix
+      result[6*ang_idx+0] = t.x;
+      result[6*ang_idx+1] = t.y;
+      result[6*ang_idx+2] = t.z;
       result[6*ang_idx+3] = axis_quat.x;
       result[6*ang_idx+4] = axis_quat.y;
       result[6*ang_idx+5] = axis_quat.z;
@@ -199,6 +203,9 @@ __global__ void jacobian_mixed_frame(float *data, float *angs, size_t *num_data_
   if (type == urdf::Joint::REVOLUTE) {
     Quaternion axis_quat(0, axis[0], axis[1], axis[2]);
     axis_quat = r * axis_quat * r.inverse();
+    result[6*ang_idx+0] = t.x;
+    result[6*ang_idx+1] = t.y;
+    result[6*ang_idx+2] = t.z;
     result[6*ang_idx+3] = axis_quat.x;
     result[6*ang_idx+4] = axis_quat.y;
     result[6*ang_idx+5] = axis_quat.z;
@@ -217,8 +224,12 @@ __global__ void jacobian_mixed_frame(float *data, float *angs, size_t *num_data_
   t += nxt_translation;
 
   for (size_t i = start_ang_idx; i < ang_idx; ++i) {
-    result[6*i+0] += -result[6*i+0]*t.z + result[6*i+2]*t.y;
-    result[6*i+1] += result[6*i+0]*t.z - result[6*i+2]*t.x;
-    result[6*i+2] += -result[6*i+0]*t.y + result[6*i+1]*t.x;
+    if (result[6*i+3] == 0 && result[6*i+4] == 0 && result[6*i+5] == 0) continue;
+    float dx = result[6*i+4]*(t.z-result[6*i+2]) - result[6*i+5]*(t.y-result[6*i+1]);
+    float dy = -result[6*i+3]*(t.z-result[6*i+2]) + result[6*i+5]*(t.x-result[6*i+0]);
+    float dz = result[6*i+3]*(t.y-result[6*i+1]) - result[6*i+4]*(t.x-result[6*i+0]);
+    result[6*i+0] = dx;
+    result[6*i+1] = dy;
+    result[6*i+2] = dz;
   }
 }

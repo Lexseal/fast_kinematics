@@ -4,6 +4,7 @@
 #include <Eigen/Geometry>
 #include <urdf_parser/urdf_parser.h>
 #include <iostream>
+#include <vector>
 #include <unordered_map>
 
 struct JointTree {
@@ -17,6 +18,10 @@ struct JointTree {
   std::vector<std::string> children_links;
 };
 using JointTreePtr = std::shared_ptr<JointTree>;
+
+// representation
+// [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats), ...]
+constexpr size_t float_per_joint = 11;
 
 class Parser {
 public:
@@ -67,5 +72,80 @@ public:
     JointTreePtr root = root_joints[0];
   
     return root;
+  }
+
+  static size_t find_num_of_active_joints(JointTreePtr tip) {
+    size_t num_of_active_joints = 0;
+    JointTreePtr walker = tip;
+    while (walker) {
+      num_of_active_joints += (walker->type != urdf::Joint::FIXED);
+      walker = walker->parent;
+    }
+    return num_of_active_joints;
+  }
+
+  static size_t find_num_of_joints(JointTreePtr tip) {
+    size_t num_of_joints = 0;
+    JointTreePtr walker = tip;
+    while (walker) {
+      ++num_of_joints;
+      walker = walker->parent;
+    }
+    return num_of_joints;
+  }
+
+  static JointTreePtr find_link_parent(JointTreePtr root, std::string eef_name, bool verbose = false) {
+    JointTreePtr tip;
+    std::queue<JointTreePtr> q;
+    q.push(root);
+    while (!q.empty()) {
+      JointTreePtr node = q.front(); q.pop();
+      if (verbose) {
+        std::cout << "Joint name: " << node->name << std::endl;
+        std::cout << "Joint type: " << node->type << std::endl;
+        std::cout << "Joint rotation: " << node->rotation << std::endl;
+        std::cout << "Joint position: " << node->position << std::endl;
+        std::cout << "Joint axis: " << node->axis.transpose() << std::endl;
+        if (node->parent) {
+          std::cout << "Parent joint name: " << node->parent->name << std::endl;
+        }
+      }
+      for (auto &child : node->children) q.push(child);
+      if (std::find(node->children_links.begin(),
+                    node->children_links.end(),
+                    eef_name) != node->children_links.end()) {
+        tip = node;
+        break;  // found
+      }
+    }
+    return tip;
+  }
+
+  static void prepare_repr(size_t num_of_robots, JointTreePtr tip, float **data, size_t **cum_idx) {
+    size_t num_of_joints = find_num_of_joints(tip);
+    size_t idx = num_of_robots * float_per_joint * num_of_joints;
+    *data = new float[idx];
+    *cum_idx = new size_t[num_of_robots];
+    (*cum_idx)[0] = num_of_joints * float_per_joint;
+    JointTreePtr walker = tip;
+    while (walker) {
+      (*data)[--idx] = walker->axis.z();
+      (*data)[--idx] = walker->axis.y();
+      (*data)[--idx] = walker->axis.x();
+      (*data)[--idx] = walker->type;
+      (*data)[--idx] = walker->rotation.coeffs().z();
+      (*data)[--idx] = walker->rotation.coeffs().y();
+      (*data)[--idx] = walker->rotation.coeffs().x();
+      (*data)[--idx] = walker->rotation.coeffs().w();
+      (*data)[--idx] = walker->position.z();
+      (*data)[--idx] = walker->position.y();
+      (*data)[--idx] = walker->position.x();
+      walker = walker->parent;
+    }
+    for (size_t i = 0; i < num_of_robots-1; ++i) {
+      memcpy((*data) + i*float_per_joint*num_of_joints,
+             (*data) + (num_of_robots-1)*float_per_joint*num_of_joints, float_per_joint*num_of_joints*sizeof(float));
+      (*cum_idx)[i+1] = (*cum_idx)[i] + num_of_joints * float_per_joint;
+    }
   }
 };
