@@ -20,3 +20,10 @@ set_source_files_properties(tests/test_client.cpp PROPERTIES LANGUAGE CUDA)
 add_executable(test_client tests/test_client.cpp)
 target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
 target_link_libraries(test_client ${urdfdom_LIBRARIES})
+
+# include pybind11
+set_source_files_properties(pybind/pybind_fast_kinematics.cpp PROPERTIES LANGUAGE CUDA)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11")
+pybind11_add_module(fast_kinematics pybind/pybind_fast_kinematics.cpp)
+target_compile_options(fast_kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
+target_link_libraries(fast_kinematics PRIVATE ${urdfdom_LIBRARIES})

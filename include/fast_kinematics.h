@@ -21,27 +21,6 @@ public:
     copy_memory();
   }
 
-  void allocate_memory() {
-    size_t result_max_size = std::max(7*num_of_robots, 6*num_of_robots*num_of_active_joints);
-    h_cum_active_joint_idx = new size_t[num_of_robots];
-    h_cum_active_joint_idx[0] = num_of_active_joints;
-    for (size_t i = 1; i < num_of_robots; ++i) {
-      h_cum_active_joint_idx[i] = h_cum_active_joint_idx[i - 1] + num_of_active_joints;
-    }
-    h_result = new float[result_max_size];
-    cudaMalloc(&d_data, h_cum_data_idx[num_of_robots-1] * sizeof(float));
-    cudaMalloc(&d_angs, h_cum_active_joint_idx[num_of_robots-1] * sizeof(float));
-    cudaMalloc(&d_result, result_max_size * sizeof(float));
-    cudaMalloc(&d_num_of_joints_cum, num_of_robots * sizeof(size_t));
-    cudaMalloc(&d_num_of_active_joints_cum, num_of_robots * sizeof(size_t));
-  }
-
-  void copy_memory() {
-    cudaMemcpy(d_data, h_data, h_cum_data_idx[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_num_of_joints_cum, h_cum_data_idx, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
-    cudaMemcpy(d_num_of_active_joints_cum, h_cum_active_joint_idx, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
-  }
-
   ~FastKinematics() {
     delete[] h_data;
     delete[] h_cum_active_joint_idx;
@@ -99,4 +78,25 @@ private:
   size_t num_of_robots;
   std::string eef_name;
   std::string urdf_path;
+
+  void allocate_memory() {
+    size_t result_max_size = std::max(7*num_of_robots, 6*num_of_robots*num_of_active_joints);
+    h_cum_active_joint_idx = new size_t[num_of_robots];
+    h_cum_active_joint_idx[0] = num_of_active_joints;
+    for (size_t i = 1; i < num_of_robots; ++i) {
+      h_cum_active_joint_idx[i] = h_cum_active_joint_idx[i - 1] + num_of_active_joints;
+    }
+    h_result = new float[result_max_size];
+    cudaMalloc(&d_data, h_cum_data_idx[num_of_robots-1] * sizeof(float));
+    cudaMalloc(&d_angs, h_cum_active_joint_idx[num_of_robots-1] * sizeof(float));
+    cudaMalloc(&d_result, result_max_size * sizeof(float));
+    cudaMalloc(&d_num_of_joints_cum, num_of_robots * sizeof(size_t));
+    cudaMalloc(&d_num_of_active_joints_cum, num_of_robots * sizeof(size_t));
+  }
+
+  void copy_memory() {
+    cudaMemcpy(d_data, h_data, h_cum_data_idx[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_num_of_joints_cum, h_cum_data_idx, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
+    cudaMemcpy(d_num_of_active_joints_cum, h_cum_active_joint_idx, num_of_robots * sizeof(size_t), cudaMemcpyHostToDevice);
+  }
 };
