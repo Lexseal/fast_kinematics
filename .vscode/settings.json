@@ -96,6 +96,7 @@
     "forward_list": "cpp",
     "unordered_set": "cpp",
     "typeindex": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "specialfunctions": "cpp"
   }
 }

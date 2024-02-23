@@ -23,7 +23,7 @@ int main() {
 
   auto start = std::chrono::high_resolution_clock::now();
   for (size_t i = 0; i < 1000; ++i) {
-    std::vector<float> h_result = fk.jacobian_mixed_frame(h_angs);
+    auto h_result = fk.jacobian_mixed_frame(h_angs);
   }
   auto end = std::chrono::high_resolution_clock::now();
   std::cout << "Elapsed time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;

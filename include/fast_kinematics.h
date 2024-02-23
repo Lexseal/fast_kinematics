@@ -1,8 +1,8 @@
 #pragma once
 
-#include <iostream>
+#include <string>
+#include <Eigen/Core>
 #include <vector>
-#include <unordered_map>
 #include <kinematics.h>
 #include <parser.h>
 
@@ -32,18 +32,17 @@ public:
     cudaFree(d_num_of_active_joints_cum);
   }
 
-  std::vector<float> forward_kinematics(const std::vector<float> &h_angs, size_t block_size=256) {
+  Eigen::Ref<Eigen::VectorXf> forward_kinematics(std::vector<float> &h_angs, size_t block_size=256) {
     assert(h_angs.size() == h_cum_active_joint_idx[num_of_robots-1]);  // check if the number of joints is correct
     cudaMemcpy(d_angs, h_angs.data(), h_cum_active_joint_idx[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
     dim3 grid((num_of_robots+(block_size-1))/block_size);
     dim3 block(block_size);
     _forward_kinematics<<<grid, block>>>(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
-    cudaMemcpy(h_fk_result.data(), d_result, num_of_robots * 7 * sizeof(float), cudaMemcpyDeviceToHost);
+    cudaMemcpy(h_fk_result.data(), d_result, 7*num_of_robots * sizeof(float), cudaMemcpyDeviceToHost);
     return h_fk_result;
-    // TODO[xinsong] this copies the result twice, can we avoid it while using vector?
   }
 
-  std::vector<float> jacobian_mixed_frame(const std::vector<float> &h_angs, size_t block_size=256) {
+  Eigen::Ref<Eigen::VectorXf> jacobian_mixed_frame(const std::vector<float> &h_angs, size_t block_size=256) {
     assert(h_angs.size() == h_cum_active_joint_idx[num_of_robots-1]);  // check if the number of joints is correct
     cudaMemcpy(d_angs, h_angs.data(), h_cum_active_joint_idx[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
     dim3 grid((num_of_robots+(block_size-1))/block_size);
@@ -54,7 +53,7 @@ public:
     return h_jac_result;
   }
 
-  std::vector<float> jacobian_world_frame(const std::vector<float> &h_angs, size_t block_size=256) {
+  Eigen::Ref<Eigen::VectorXf> jacobian_world_frame(const std::vector<float> &h_angs, size_t block_size=256) {
     assert(h_angs.size() == h_cum_active_joint_idx[num_of_robots-1]);  // check if the number of joints is correct
     cudaMemcpy(d_angs, h_angs.data(), h_cum_active_joint_idx[num_of_robots-1] * sizeof(float), cudaMemcpyHostToDevice);
     dim3 grid((num_of_robots+(block_size-1))/block_size);
@@ -62,6 +61,10 @@ public:
     _jacobian<<<grid, block>>>(d_data, d_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
     cudaMemcpy(h_jac_result.data(), d_result,
                h_cum_active_joint_idx[num_of_robots-1] * 6 * sizeof(float), cudaMemcpyDeviceToHost);
+    return h_jac_result;
+  }
+
+  Eigen::Ref<Eigen::VectorXf> do_nothing(const std::vector<float> &h_angs, size_t block_size=256) {
     return h_jac_result;
   }
 
@@ -77,7 +80,7 @@ private:
   JointTreePtr root, tip;
   size_t num_of_active_joints, num_of_joints;
   float *h_data;
-  std::vector<float> h_fk_result, h_jac_result;
+  Eigen::VectorXf h_fk_result, h_jac_result;
   float *d_data, *d_angs, *d_result;
   size_t *h_cum_data_idx, *d_num_of_joints_cum;
   size_t *h_cum_active_joint_idx, *d_num_of_active_joints_cum;
@@ -92,6 +95,7 @@ private:
       h_cum_active_joint_idx[i] = h_cum_active_joint_idx[i - 1] + num_of_active_joints;
     }
     size_t result_max_size = std::max(7*num_of_robots, 6*h_cum_active_joint_idx[num_of_robots-1]);
+    // resize the eigen xd vector
     h_fk_result.resize(7*num_of_robots);
     h_jac_result.resize(6*h_cum_active_joint_idx[num_of_robots-1]);
     cudaMalloc(&d_data, h_cum_data_idx[num_of_robots-1] * sizeof(float));

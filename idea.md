@@ -79,9 +79,12 @@ DstMemType: The type of destination memory accessed by memory operation/copy
 
 After wrapping the code in pybind11, I drag raced the code against pytorch_kinematics. The results are as follows:
 
-| unit: ms | 16     | 64     | 256    | 1024   | 4096   |
-|----------|--------|--------|--------|--------|--------|
-| Pytorch  | 14.164 | 14.743 | 14.490 | 16.667 | 20.776 |
-| This     | 0.195  | 0.686  | 2.461  | 8.669  | 36.887 |
+| unit: ms      | 16     | 64     | 256    | 1024   | 4096   |
+|---------------|--------|--------|--------|--------|--------|
+| Pytorch       | 14.164 | 14.743 | 14.490 | 16.667 | 20.776 |
+| Vector/List   | 0.195  | 0.686  | 2.461  | 8.669  | 36.887 |
+| Eigen/numpy   | 0.126  | 0.232  | 0.707  | 2.488  | 9.628  |
 
 Additionally, for size ~1000, the C++ version takes 0.165ms, which is 50 times faster than python. It has to be pybind11 overhead and it needs to be optimized.
+
+Turns out the entire overhead is due to pybind11. I made a do nothing function and timed it. It took the same time as the jacobian function.
