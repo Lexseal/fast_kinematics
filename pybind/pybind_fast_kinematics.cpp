@@ -1,13 +1,24 @@
 #include <pybind11/pybind11.h>
-// #include <fast_kinematics.h>
+#include <pybind11/stl.h>
+#include <pybind11/numpy.h>
+#include <fast_kinematics.h>
 
 namespace py = pybind11;
 
-int add(int i, int j) {
-    return i + j;
-}
-
 PYBIND11_MODULE(fast_kinematics, m) {
   m.doc() = "fast kinematics python bindings";
-  m.def("add", &add, "A function which adds two numbers");
+
+  auto PyFastKinematics = py::class_<FastKinematics>(m, "FastKinematics");
+  PyFastKinematics
+    .def(py::init<std::string, size_t, std::string>(), py::arg("urdf_path"),
+                                                       py::arg("num_of_robots"),
+                                                       py::arg("eef_name"))
+    .def("forward_kinematics", &FastKinematics::forward_kinematics,
+         py::arg("h_angs"), py::arg("block_size")=256)
+    .def("jacobian_mixed_frame", &FastKinematics::jacobian_mixed_frame,
+         py::arg("h_angs"), py::arg("block_size")=256)
+    .def("jacobian_world_frame", &FastKinematics::jacobian_world_frame,
+         py::arg("h_angs"), py::arg("block_size")=256)
+    .def("get_num_of_active_joints", &FastKinematics::get_num_of_active_joints)
+    .def("get_num_of_joints", &FastKinematics::get_num_of_joints);
 }

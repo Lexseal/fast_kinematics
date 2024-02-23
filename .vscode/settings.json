@@ -90,6 +90,12 @@
     "random": "cpp",
     "type_traits": "cpp",
     "utility": "cpp",
-    "cinttypes": "cpp"
+    "cinttypes": "cpp",
+    "codecvt": "cpp",
+    "condition_variable": "cpp",
+    "forward_list": "cpp",
+    "unordered_set": "cpp",
+    "typeindex": "cpp",
+    "valarray": "cpp"
   }
 }
