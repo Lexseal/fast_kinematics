@@ -17,11 +17,11 @@ include_directories(${inc_dir})
 include_directories(${urdfdom_INCLUDE_DIRS})
 include_directories(include)
 
-# set_source_files_properties(tests/test_client.cpp PROPERTIES LANGUAGE CUDA)
-# add_executable(test_client tests/test_client.cpp)
-# set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES 52)
-# target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
-# target_link_libraries(test_client ${urdfdom_LIBRARIES})
+set_source_files_properties(tests/test_client.cpp PROPERTIES LANGUAGE CUDA)
+add_executable(test_client tests/test_client.cpp)
+set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES 52)
+target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
+target_link_libraries(test_client ${urdfdom_LIBRARIES})
 
 # include pybind11
 set_source_files_properties(pybind/pybind_fast_kinematics.cpp PROPERTIES LANGUAGE CUDA)

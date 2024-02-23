@@ -74,3 +74,14 @@ DSMem: Dynamic shared memory allocated per CUDA block.
 SrcMemType: The type of source memory accessed by memory operation/copy
 DstMemType: The type of destination memory accessed by memory operation/copy
 ==19104== Generated result file: /home/paperspace/fast_kinematics/build/results.nvprof
+
+## More Benchmarks
+
+After wrapping the code in pybind11, I drag raced the code against pytorch_kinematics. The results are as follows:
+
+| unit: ms | 16     | 64     | 256    | 1024   | 4096   |
+|----------|--------|--------|--------|--------|--------|
+| Pytorch  | 14.164 | 14.743 | 14.490 | 16.667 | 20.776 |
+| This     | 0.195  | 0.686  | 2.461  | 8.669  | 36.887 |
+
+Additionally, for size ~1000, the C++ version takes 0.165ms, which is 50 times faster than python. It has to be pybind11 overhead and it needs to be optimized.

@@ -3,9 +3,10 @@
 #include <iomanip>
 #include <iostream>
 #include <fast_kinematics.h>
+#include <chrono>
 
 int main() {
-  size_t num_of_robots = 1;
+  size_t num_of_robots = 1000;
   FastKinematics fk("../kuka_iiwa.urdf", num_of_robots, "lbr_iiwa_link_7");
   std::vector<float> h_angs(num_of_robots*fk.get_num_of_active_joints());
   h_angs[0] = 0.0;
@@ -20,13 +21,18 @@ int main() {
            fk.get_num_of_active_joints() * sizeof(float));
   }
 
-  std::vector<float> h_result = fk.jacobian_mixed_frame(h_angs);
-
-  for (size_t i = 0; i < 6; ++i) {
-    for (size_t j = 0; j < fk.get_num_of_active_joints(); ++j) {
-      std::cout << std::fixed << std::setprecision(3) << h_result[j*6+i] << " ";
-    }
-    std::cout << std::endl;
+  auto start = std::chrono::high_resolution_clock::now();
+  for (size_t i = 0; i < 1000; ++i) {
+    std::vector<float> h_result = fk.jacobian_mixed_frame(h_angs);
   }
+  auto end = std::chrono::high_resolution_clock::now();
+  std::cout << "Elapsed time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
+
+  // for (size_t i = 0; i < 6; ++i) {
+  //   for (size_t j = 0; j < fk.get_num_of_active_joints(); ++j) {
+  //     std::cout << std::fixed << std::setprecision(3) << h_result[j*6+i] << " ";
+  //   }
+  //   std::cout << std::endl;
+  // }
   return 0;
 }
