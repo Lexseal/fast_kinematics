@@ -8,7 +8,7 @@
 int main() {
   size_t num_of_robots = 1000;
   FastKinematics fk("../kuka_iiwa.urdf", num_of_robots, "lbr_iiwa_link_7");
-  std::vector<float> h_angs(num_of_robots*fk.get_num_of_active_joints());
+  Eigen::VectorXf h_angs(num_of_robots * fk.get_num_of_active_joints());
   h_angs[0] = 0.0;
   h_angs[1] = -M_PI / 4.0;
   h_angs[2] = 0.0;
@@ -17,9 +17,11 @@ int main() {
   h_angs[5] = M_PI / 4.0;
   h_angs[6] = 0.0;
   for (size_t i = 1; i < num_of_robots; ++i) {
-    memcpy(h_angs.data() + i*fk.get_num_of_active_joints(), h_angs.data(),
-           fk.get_num_of_active_joints() * sizeof(float));
+    std::memcpy(h_angs.data() + i * fk.get_num_of_active_joints(), h_angs.data(),
+                fk.get_num_of_active_joints() * sizeof(float));
   }
+
+  // fk.do_nothing(h_angs);
 
   auto start = std::chrono::high_resolution_clock::now();
   for (size_t i = 0; i < 1000; ++i) {

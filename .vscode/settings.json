@@ -97,6 +97,7 @@
     "unordered_set": "cpp",
     "typeindex": "cpp",
     "valarray": "cpp",
-    "specialfunctions": "cpp"
+    "specialfunctions": "cpp",
+    "shared_mutex": "cpp"
   }
 }
