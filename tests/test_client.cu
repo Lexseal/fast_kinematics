@@ -21,7 +21,12 @@ int main() {
                 fk.get_num_of_active_joints() * sizeof(float));
   }
 
-  fk.do_nothing(h_angs);
+  float *d_angs;
+  cudaMalloc(&d_angs, h_angs.size() * sizeof(float));
+  cudaMemcpy(d_angs, h_angs.data(), h_angs.size() * sizeof(float), cudaMemcpyHostToDevice);
+  torch::Tensor t_angs = torch::from_blob(d_angs, {h_angs.size()});
+  torch::Tensor result = fk.forward_kinematics_pytorch(t_angs);
+  std::cout << result << std::endl;
 
   // auto start = std::chrono::high_resolution_clock::now();
   // for (size_t i = 0; i < 1000; ++i) {

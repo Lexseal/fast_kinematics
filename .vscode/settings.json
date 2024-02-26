@@ -98,6 +98,7 @@
     "typeindex": "cpp",
     "valarray": "cpp",
     "specialfunctions": "cpp",
-    "shared_mutex": "cpp"
+    "shared_mutex": "cpp",
+    "ranges": "cpp"
   }
 }
