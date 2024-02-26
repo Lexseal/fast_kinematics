@@ -1,3 +1,7 @@
+#include <unordered_map>
+#include <iostream>
+#include <urdf_parser/urdf_parser.h>
+#include <queue>
 #include <parser.h>
 
 JointTreePtr Parser::parse(std::string urdf_path, bool verbose) {

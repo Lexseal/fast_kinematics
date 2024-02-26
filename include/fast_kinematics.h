@@ -2,8 +2,7 @@
 
 #include <string>
 #include <Eigen/Core>
-#include <vector>
-#include <kinematics.h>
+#include <torch/torch.h>
 #include <parser.h>
 
 class FastKinematics {

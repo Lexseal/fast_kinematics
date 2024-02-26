@@ -1,8 +1,5 @@
 #pragma once
 
-#include <urdf_parser/urdf_parser.h>
-#include <cuda_quat.h>
-
 // data structure
 // [translation (3 floats), rotation (4 floats), type (1 float), axis (3 floats)]
 

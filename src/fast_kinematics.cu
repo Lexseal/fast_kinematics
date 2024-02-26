@@ -1,5 +1,5 @@
 #include <fast_kinematics.h>
-#include <torch/torch.h>
+#include <kinematics.h>
 
 FastKinematics::FastKinematics(std::string urdf_path, size_t num_of_robots, std::string eef_name)
 : urdf_path(urdf_path)
@@ -62,6 +62,8 @@ Eigen::Ref<Eigen::VectorXf> FastKinematics::do_nothing(Eigen::Ref<Eigen::VectorX
   std::cout << tensor << std::endl;
   return h_jac_result;
 }
+
+
 
 size_t FastKinematics::get_num_of_active_joints() {
   return num_of_active_joints;

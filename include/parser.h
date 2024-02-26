@@ -2,11 +2,8 @@
 
 #include <Eigen/Core>
 #include <Eigen/Geometry>
-#include <urdf_parser/urdf_parser.h>
-#include <iostream>
+#include <string>
 #include <vector>
-#include <unordered_map>
-#include <queue>
 
 struct JointTree {
   std::string name;
