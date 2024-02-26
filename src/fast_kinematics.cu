@@ -1,4 +1,5 @@
 #include <fast_kinematics.h>
+#include <torch/torch.h>
 
 FastKinematics::FastKinematics(std::string urdf_path, size_t num_of_robots, std::string eef_name)
 : urdf_path(urdf_path)
@@ -57,8 +58,8 @@ Eigen::Ref<Eigen::VectorXf> FastKinematics::jacobian_world_frame(Eigen::Ref<Eige
 }
 
 Eigen::Ref<Eigen::VectorXf> FastKinematics::do_nothing(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size) {
-  // torch::Tensor tensor = torch::eye(3);
-  // std::cout << tensor << std::endl;
+  torch::Tensor tensor = torch::eye(3);
+  std::cout << tensor << std::endl;
   return h_jac_result;
 }
 

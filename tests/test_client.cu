@@ -21,14 +21,14 @@ int main() {
                 fk.get_num_of_active_joints() * sizeof(float));
   }
 
-  // fk.do_nothing(h_angs);
+  fk.do_nothing(h_angs);
 
-  auto start = std::chrono::high_resolution_clock::now();
-  for (size_t i = 0; i < 1000; ++i) {
-    auto h_result = fk.jacobian_mixed_frame(h_angs);
-  }
-  auto end = std::chrono::high_resolution_clock::now();
-  std::cout << "Elapsed time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
+  // auto start = std::chrono::high_resolution_clock::now();
+  // for (size_t i = 0; i < 1000; ++i) {
+  //   // auto h_result = fk.jacobian_mixed_frame(h_angs);
+  // }
+  // auto end = std::chrono::high_resolution_clock::now();
+  // std::cout << "Elapsed time: " << std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() << " ms" << std::endl;
 
   // for (size_t i = 0; i < 6; ++i) {
   //   for (size_t j = 0; j < fk.get_num_of_active_joints(); ++j) {
