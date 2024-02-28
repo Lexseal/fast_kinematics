@@ -3,15 +3,22 @@ project(fast_kinematics LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 14)
 
-# set(CMAKE_CXX_COMPILER "/usr/bin/g++-10")
-
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g3 -Wall -Werror -fsized-deallocation -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fPIC")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -fPIC")
 
+if(NOT DEFINED CMAKE_PREFIX_PATH)
+  find_package(Python COMPONENTS Interpreter Development)
+  execute_process(
+      COMMAND ${Python_EXECUTABLE} -c "import torch;print(torch.utils.cmake_prefix_path)"
+      OUTPUT_VARIABLE CMAKE_PREFIX_PATH
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+endif()
+
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
-find_package(Torch REQUIRED PATH "${TORCH_INSTALL_PREFIX}")
+find_package(Torch REQUIRED)
 find_library(TORCH_PYTHON_LIBRARY torch_python PATH "${TORCH_INSTALL_PREFIX}/lib")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 

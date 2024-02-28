@@ -57,12 +57,6 @@ Eigen::Ref<Eigen::VectorXf> FastKinematics::jacobian_world_frame(Eigen::Ref<Eige
   return h_jac_result;
 }
 
-Eigen::Ref<Eigen::VectorXf> FastKinematics::do_nothing(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size) {
-  torch::Tensor tensor = torch::eye(3);
-  std::cout << tensor << std::endl;
-  return h_jac_result;
-}
-
 torch::Tensor FastKinematics::forward_kinematics_pytorch(torch::Tensor t_angs, size_t block_size) {
   // first check the shape of the input tensor
   assert(t_angs.size(0) == h_cum_active_joint_idx[num_of_robots-1]);

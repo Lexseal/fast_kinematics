@@ -13,7 +13,6 @@ public:
   Eigen::Ref<Eigen::VectorXf> forward_kinematics(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
   Eigen::Ref<Eigen::VectorXf> jacobian_mixed_frame(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
   Eigen::Ref<Eigen::VectorXf> jacobian_world_frame(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
-  Eigen::Ref<Eigen::VectorXf> do_nothing(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
   torch::Tensor forward_kinematics_pytorch(torch::Tensor t_angs, size_t block_size=256);
   torch::Tensor jacobian_mixed_frame_pytorch(torch::Tensor t_angs, size_t block_size=256);
   torch::Tensor jacobian_world_frame_pytorch(torch::Tensor t_angs, size_t block_size=256);

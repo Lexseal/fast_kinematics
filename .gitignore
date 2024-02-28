@@ -1,2 +1,4 @@
 .vscode/
+*.egg-info/
 build/
+wheelhouse/

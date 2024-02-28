@@ -19,10 +19,12 @@ PYBIND11_MODULE(fast_kinematics, m) {
          py::arg("h_angs"), py::arg("block_size")=256)
     .def("jacobian_world_frame", &FastKinematics::jacobian_world_frame,
          py::arg("h_angs"), py::arg("block_size")=256)
-    .def("do_nothing", &FastKinematics::do_nothing,
-         py::arg("h_angs"), py::arg("block_size")=256)
     .def("forward_kinematics_pytorch", &FastKinematics::forward_kinematics_pytorch,
          py::arg("t_angs"), py::arg("block_size")=256)
+    .def("jacobian_mixed_frame_pytorch", &FastKinematics::jacobian_mixed_frame_pytorch,
+         py::arg("h_angs"), py::arg("block_size")=256)
+    .def("jacobian_world_frame_pytorch", &FastKinematics::jacobian_world_frame_pytorch,
+         py::arg("h_angs"), py::arg("block_size")=256)
     .def("get_num_of_active_joints", &FastKinematics::get_num_of_active_joints)
     .def("get_num_of_joints", &FastKinematics::get_num_of_joints);
 }
