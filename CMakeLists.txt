@@ -11,7 +11,8 @@ set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -fPIC")
 
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
-find_package(Torch REQUIRED)
+find_package(Torch REQUIRED PATH "${TORCH_INSTALL_PREFIX}")
+find_library(TORCH_PYTHON_LIBRARY torch_python PATH "${TORCH_INSTALL_PREFIX}/lib")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 # eigen include directory
@@ -43,4 +44,4 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11")
 pybind11_add_module(fast_kinematics pybind/pybind_fast_kinematics.cu)
 set_target_properties(fast_kinematics PROPERTIES CUDA_ARCHITECTURES 52)
 target_compile_options(fast_kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
-target_link_libraries(fast_kinematics PRIVATE kinematics)
+target_link_libraries(fast_kinematics PRIVATE "${TORCH_PYTHON_LIBRARY}" kinematics)

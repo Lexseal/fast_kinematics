@@ -1,7 +1,6 @@
-#include <pybind11/pybind11.h>
-#include <pybind11/stl.h>
 #include <pybind11/numpy.h>
 #include <pybind11/eigen.h>
+#include <torch/extension.h>
 #include <fast_kinematics.h>
 
 namespace py = pybind11;
@@ -22,6 +21,8 @@ PYBIND11_MODULE(fast_kinematics, m) {
          py::arg("h_angs"), py::arg("block_size")=256)
     .def("do_nothing", &FastKinematics::do_nothing,
          py::arg("h_angs"), py::arg("block_size")=256)
+    .def("forward_kinematics_pytorch", &FastKinematics::forward_kinematics_pytorch,
+         py::arg("t_angs"), py::arg("block_size")=256)
     .def("get_num_of_active_joints", &FastKinematics::get_num_of_active_joints)
     .def("get_num_of_joints", &FastKinematics::get_num_of_joints);
 }
