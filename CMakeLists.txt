@@ -6,7 +6,9 @@ set(CMAKE_CUDA_STANDARD 14)
 set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g3 -Wall -Werror -fsized-deallocation -Wno-deprecated-declarations")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fPIC")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -fPIC")
+set(CMAKE_CUDA_RUNTIME_LIBRARY Static)
 
+# find torch if no explicit path is given
 if(NOT DEFINED CMAKE_PREFIX_PATH)
   find_package(Python COMPONENTS Interpreter Development)
   execute_process(
@@ -15,6 +17,9 @@ if(NOT DEFINED CMAKE_PREFIX_PATH)
       OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 endif()
+
+# torch requires pre-C++11 ABI
+# add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
 
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
