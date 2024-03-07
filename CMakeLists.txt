@@ -19,13 +19,19 @@ if(NOT DEFINED CMAKE_PREFIX_PATH)
 endif()
 
 # torch requires pre-C++11 ABI
-# add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+# may or may not be necessary here but doesn't hurt
+add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
 
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
 find_package(Torch REQUIRED)
 find_library(TORCH_PYTHON_LIBRARY torch_python PATH "${TORCH_INSTALL_PREFIX}/lib")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+# urdfdom links statically to these two libraries, but for some reason,
+# on my system I still need to link these two separately
+find_package(TinyXML2 REQUIRED)
+find_package(console_bridge REQUIRED)
 
 # eigen include directory
 get_target_property(inc_dir Eigen3::Eigen INTERFACE_INCLUDE_DIRECTORIES)
@@ -38,7 +44,7 @@ include_directories(include)
 
 # first make the parsing library
 add_library(parser src/parser.cpp)
-target_link_libraries(parser PRIVATE ${urdfdom_LIBRARIES})
+target_link_libraries(parser PRIVATE urdfdom_model tinyxml2 console_bridge)
 
 # then make core kinematics library
 add_library(kinematics src/kinematics.cu src/fast_kinematics.cu)
@@ -53,7 +59,5 @@ target_link_libraries(test_client PRIVATE kinematics)
 
 # include pybind11
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11")
-pybind11_add_module(fast_kinematics pybind/pybind_fast_kinematics.cu)
-set_target_properties(fast_kinematics PROPERTIES CUDA_ARCHITECTURES 52)
-target_compile_options(fast_kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
+pybind11_add_module(fast_kinematics pybind/pybind_fast_kinematics.cpp)
 target_link_libraries(fast_kinematics PRIVATE "${TORCH_PYTHON_LIBRARY}" kinematics)
