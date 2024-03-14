@@ -17,6 +17,11 @@ class CMakeExtension(Extension):
 
 class CMakeBuild(build_ext):
   def build_extension(self, ext: CMakeExtension) -> None:
+
+    # install numpy and pytorch
+    subprocess.run([sys.executable, "-m", "pip", "install", "numpy"])
+    subprocess.run([sys.executable, "-m", "pip", "install", "torch"])
+
     # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
     ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
     extdir = ext_fullpath.parent.resolve()
