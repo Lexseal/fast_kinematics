@@ -71,10 +71,11 @@ setup(
   author="Xinsong Lin",
   author_email="x8lin@ucsd.edu",
   description="A fast kinematics library for robotics",
-  long_description="",
+  long_description="Uses CUDA to calculate forward kinematics and Jacobian in parallel for thousands of robots",
   ext_modules=[CMakeExtension("fast_kinematics")],
   cmdclass={"build_ext": CMakeBuild},
   zip_safe=False,
   requires=["pytorch", "numpy"],
   python_requires=">=3.8",
+  home_page="https://github.com/Lexseal/fast_kinematics",
 )
