@@ -15,6 +15,10 @@ if(NOT DEFINED CMAKE_PREFIX_PATH)
   if(NOT DEFINED PYTHON_EXECUTABLE)
     find_program(PYTHON_EXECUTABLE python3)
   endif()
+  # if python3 not found, find python3.10
+  if(NOT PYTHON_EXECUTABLE)
+    find_program(PYTHON_EXECUTABLE python3.10)
+  endif()
   execute_process(
     COMMAND ${PYTHON_EXECUTABLE} -c "import torch;print(torch.utils.cmake_prefix_path)"
     OUTPUT_VARIABLE CMAKE_PREFIX_PATH

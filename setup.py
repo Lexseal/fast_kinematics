@@ -75,6 +75,6 @@ setup(
   ext_modules=[CMakeExtension("fast_kinematics")],
   cmdclass={"build_ext": CMakeBuild},
   zip_safe=False,
-  requires=["pytorch"],
+  requires=["pytorch", "numpy"],
   python_requires=">=3.8",
 )
