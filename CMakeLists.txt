@@ -8,19 +8,15 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fPIC")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -fPIC")
 set(CMAKE_CUDA_RUNTIME_LIBRARY Static)
 
-set(TORCH_CUDA_ARCH_LIST "5.0 8.0 8.6 8.9 9.0")
+set(TORCH_CUDA_ARCH_LIST "5.0 6.1 8.0 8.6 8.9 9.0")
 
 # find torch if no explicit path is given
 if(NOT DEFINED CMAKE_PREFIX_PATH)
   if(NOT DEFINED PYTHON_EXECUTABLE)
     find_program(PYTHON_EXECUTABLE python3)
   endif()
-  # if python3 not found, find python3.10
-  if(NOT PYTHON_EXECUTABLE)
-    find_program(PYTHON_EXECUTABLE python3.10)
-  endif()
   execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import torch;print(torch.utils.cmake_prefix_path)"
+    COMMAND python3.10 -c "import torch;print(torch.utils.cmake_prefix_path)"
     OUTPUT_VARIABLE CMAKE_PREFIX_PATH
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
@@ -56,12 +52,12 @@ target_link_libraries(parser PRIVATE urdfdom_model tinyxml2 console_bridge)
 
 # then make core kinematics library
 add_library(kinematics src/kinematics.cu src/fast_kinematics.cu)
-set_target_properties(kinematics PROPERTIES CUDA_ARCHITECTURES 52)
+set_target_properties(kinematics PROPERTIES CUDA_ARCHITECTURES "52;61")
 target_compile_options(kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
 target_link_libraries(kinematics PRIVATE "${TORCH_LIBRARIES}" parser)
 
 add_executable(test_client tests/test_client.cu)
-set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES 52)
+set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES "52;61")
 target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
 target_link_libraries(test_client PRIVATE kinematics)
 
