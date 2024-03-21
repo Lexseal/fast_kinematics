@@ -1,6 +1,7 @@
 #include <urdf_parser/urdf_parser.h>
 #include <kinematics.h>
 #include <cuda_quat.h>
+#include <cusolverSp.h>
 
 __global__ void _forward_kinematics(float *data, float *angs, size_t *cum_data_idx,
   size_t *cum_active_joint_idx, float *result, size_t num_of_robots) {
