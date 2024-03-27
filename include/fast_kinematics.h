@@ -7,7 +7,7 @@
 
 class FastKinematics {
 public:
-  FastKinematics(std::string urdf_path, size_t num_of_robots, std::string eef_name);
+  FastKinematics(std::string urdf_path, size_t num_of_robots, std::string eef_name, bool verbose=false);
   ~FastKinematics();
 
   Eigen::Ref<Eigen::VectorXf> forward_kinematics(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);

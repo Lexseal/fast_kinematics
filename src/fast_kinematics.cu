@@ -1,13 +1,13 @@
 #include <fast_kinematics.h>
 #include <kinematics.h>
 
-FastKinematics::FastKinematics(std::string urdf_path, size_t num_of_robots, std::string eef_name)
+FastKinematics::FastKinematics(std::string urdf_path, size_t num_of_robots, std::string eef_name, bool verbose)
 : urdf_path(urdf_path)
 , num_of_robots(num_of_robots)
 , eef_name(eef_name) {
   root = Parser::parse(urdf_path);
-  tip = Parser::find_link_parent(root, eef_name);
-  num_of_active_joints = Parser::find_num_of_active_joints(tip);
+  tip = Parser::find_link_parent(root, eef_name, verbose);
+  num_of_active_joints = Parser::find_num_of_active_joints(tip, verbose);
   num_of_joints = Parser::find_num_of_joints(tip);
   Parser::prepare_repr(num_of_robots, tip, &h_data, &h_cum_data_idx);
   allocate_memory();

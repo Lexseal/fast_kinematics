@@ -12,7 +12,8 @@ PYBIND11_MODULE(fast_kinematics, m) {
   PyFastKinematics
     .def(py::init<std::string, size_t, std::string>(), py::arg("urdf_path"),
                                                        py::arg("num_of_robots"),
-                                                       py::arg("eef_name"))
+                                                       py::arg("eef_name"),
+                                                       py::arg("verbose")=false)
     .def("forward_kinematics", &FastKinematics::forward_kinematics,
          py::arg("h_angs"), py::arg("block_size")=256)
     .def("jacobian_mixed_frame", &FastKinematics::jacobian_mixed_frame,

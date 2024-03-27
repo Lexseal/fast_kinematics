@@ -53,10 +53,14 @@ JointTreePtr Parser::parse(std::string urdf_path, bool verbose) {
   return root;
 }
 
-size_t Parser::find_num_of_active_joints(JointTreePtr tip) {
+size_t Parser::find_num_of_active_joints(JointTreePtr tip, bool verbose) {
   size_t num_of_active_joints = 0;
   JointTreePtr walker = tip;
   while (walker) {
+    if (verbose && walker->type != urdf::Joint::FIXED) {
+      std::cout << "Joint name: " << walker->name << std::endl;
+      std::cout << "Joint type: " << walker->type << std::endl;
+    }
     num_of_active_joints += (walker->type != urdf::Joint::FIXED);
     walker = walker->parent;
   }

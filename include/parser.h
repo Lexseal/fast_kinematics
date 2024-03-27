@@ -25,7 +25,7 @@ class Parser {
 public:
   static JointTreePtr parse(std::string urdf_path, bool verbose = false);
 
-  static size_t find_num_of_active_joints(JointTreePtr tip);
+  static size_t find_num_of_active_joints(JointTreePtr tip, bool verbose = false);
 
   static size_t find_num_of_joints(JointTreePtr tip);
 
