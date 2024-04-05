@@ -4,6 +4,7 @@
 #include <Eigen/Geometry>
 #include <string>
 #include <vector>
+#include <memory>
 
 struct JointTree {
   std::string name;

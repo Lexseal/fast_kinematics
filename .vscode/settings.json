@@ -99,6 +99,7 @@
     "valarray": "cpp",
     "specialfunctions": "cpp",
     "shared_mutex": "cpp",
-    "ranges": "cpp"
+    "ranges": "cpp",
+    "regex": "cpp"
   }
 }

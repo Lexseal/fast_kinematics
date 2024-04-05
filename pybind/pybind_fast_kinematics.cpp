@@ -10,7 +10,7 @@ PYBIND11_MODULE(fast_kinematics, m) {
 
   auto PyFastKinematics = py::class_<FastKinematics>(m, "FastKinematics");
   PyFastKinematics
-    .def(py::init<std::string, size_t, std::string>(), bool, py::arg("urdf_path"),
+    .def(py::init<std::string, size_t, std::string, bool>(), py::arg("urdf_path"),
                                                              py::arg("num_of_robots"),
                                                              py::arg("eef_name"),
                                                              py::arg("verbose")=false)

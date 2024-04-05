@@ -57,40 +57,40 @@ Eigen::Ref<Eigen::VectorXf> FastKinematics::jacobian_world_frame(Eigen::Ref<Eige
   return h_jac_result;
 }
 
-torch::Tensor FastKinematics::forward_kinematics_pytorch(torch::Tensor t_angs, size_t block_size) {
+float *FastKinematics::forward_kinematics_pytorch(float *t_angs, size_t block_size) {
   // first check the shape of the input tensor
-  assert(t_angs.size(0) == h_cum_active_joint_idx[num_of_robots-1]);
   dim3 grid((num_of_robots+(block_size-1))/block_size);
   dim3 block(block_size);
-  _forward_kinematics<<<grid, block>>>(d_data, t_angs.data_ptr<float>(), d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
-  // now convert d_result to a tensor
-  auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
-  torch::Tensor t_result = torch::from_blob(d_result, {h_fk_result.size()}, options);
-  return t_result;
+  _forward_kinematics<<<grid, block>>>(d_data, t_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
+  // // now convert d_result to a tensor
+  // auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
+  // torch::Tensor t_result = torch::from_blob(d_result, {h_fk_result.size()}, options);
+  // return t_result;
+  return d_result;
 }
 
-torch::Tensor FastKinematics::jacobian_mixed_frame_pytorch(torch::Tensor t_angs, size_t block_size) {
+float *FastKinematics::jacobian_mixed_frame_pytorch(float *t_angs, size_t block_size) {
   // first check the shape of the input tensor
-  assert(t_angs.size(0) == h_cum_active_joint_idx[num_of_robots-1]);
   dim3 grid((num_of_robots+(block_size-1))/block_size);
   dim3 block(block_size);
-  _jacobian_mixed_frame<<<grid, block>>>(d_data, t_angs.data_ptr<float>(), d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
-  // now convert d_result to a tensor
-  auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
-  torch::Tensor t_result = torch::from_blob(d_result, {h_jac_result.size()}, options);
-  return t_result;
+  _jacobian_mixed_frame<<<grid, block>>>(d_data, t_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
+  // // now convert d_result to a tensor
+  // auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
+  // torch::Tensor t_result = torch::from_blob(d_result, {h_jac_result.size()}, options);
+  // return t_result;
+  return d_result;
 }
 
-torch::Tensor FastKinematics::jacobian_world_frame_pytorch(torch::Tensor t_angs, size_t block_size) {
+float *FastKinematics::jacobian_world_frame_pytorch(float *t_angs, size_t block_size) {
   // first check the shape of the input tensor
-  assert(t_angs.size(0) == h_cum_active_joint_idx[num_of_robots-1]);
   dim3 grid((num_of_robots+(block_size-1))/block_size);
   dim3 block(block_size);
-  _jacobian<<<grid, block>>>(d_data, t_angs.data_ptr<float>(), d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
-  // now convert d_result to a tensor
-  auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
-  torch::Tensor t_result = torch::from_blob(d_result, {h_jac_result.size()}, options);
-  return t_result;
+  _jacobian<<<grid, block>>>(d_data, t_angs, d_num_of_joints_cum, d_num_of_active_joints_cum, d_result, num_of_robots);
+  // // now convert d_result to a tensor
+  // auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
+  // torch::Tensor t_result = torch::from_blob(d_result, {h_jac_result.size()}, options);
+  // return t_result;
+  return d_result;
 }
 
 size_t FastKinematics::get_num_of_active_joints() {
