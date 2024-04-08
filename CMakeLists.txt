@@ -54,14 +54,14 @@ target_link_libraries(parser PRIVATE urdfdom_model tinyxml2 console_bridge)
 add_library(kinematics src/kinematics.cu src/fast_kinematics.cu)
 set_target_properties(kinematics PROPERTIES CUDA_ARCHITECTURES "52;61")
 target_compile_options(kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
-target_link_libraries(kinematics PRIVATE "${TORCH_LIBRARIES}" parser)
+target_link_libraries(kinematics PRIVATE parser)
 
 add_executable(test_client tests/test_client.cu)
 set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES "52;61")
 target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
-target_link_libraries(test_client PRIVATE kinematics)
+target_link_libraries(test_client PRIVATE kinematics "${TORCH_LIBRARIES}")
 
 # include pybind11
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11")
 pybind11_add_module(fast_kinematics pybind/pybind_fast_kinematics.cpp)
-target_link_libraries(fast_kinematics PRIVATE "${TORCH_PYTHON_LIBRARY}" kinematics)
+target_link_libraries(fast_kinematics PRIVATE kinematics "${TORCH_PYTHON_LIBRARY}" "${TORCH_LIBRARIES}")
