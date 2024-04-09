@@ -62,6 +62,8 @@ class CMakeBuild(build_ext):
       ["cmake", "--build", ".", *build_args], cwd=build_temp, check=True
     )
 
+this_directory = Path(__file__).parent
+long_description = (this_directory / "readme.md").read_text()
 
 # The information here can also be placed in setup.cfg - better separation of
 # logic and declaration, and simpler if you include description/version in a file.
@@ -71,11 +73,14 @@ setup(
   author="Xinsong Lin",
   author_email="x8lin@ucsd.edu",
   description="A fast kinematics library for robotics",
-  long_description="Uses CUDA to calculate forward kinematics and Jacobian in parallel for thousands of robots",
+  long_description=long_description,
+  long_description_content_type="text/markdown",
   ext_modules=[CMakeExtension("fast_kinematics")],
   cmdclass={"build_ext": CMakeBuild},
   zip_safe=False,
   requires=["pytorch", "numpy"],
   python_requires=">=3.8",
   home_page="https://github.com/Lexseal/fast_kinematics",
+  license="MIT",
+  package_data={"fast_kinematics": ["pybind/fast_kinematics.pyi"]},
 )
