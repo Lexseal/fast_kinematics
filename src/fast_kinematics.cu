@@ -101,6 +101,10 @@ size_t FastKinematics::get_num_of_joints() {
   return num_of_joints;
 }
 
+size_t FastKinematics::get_num_of_robots() {
+  return num_of_robots;
+}
+
 void FastKinematics::allocate_memory() {
   h_cum_active_joint_idx = new size_t[num_of_robots];
   h_cum_active_joint_idx[0] = num_of_active_joints;

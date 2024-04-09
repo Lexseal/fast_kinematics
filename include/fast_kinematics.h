@@ -17,6 +17,7 @@ public:
   float *jacobian_world_frame_raw_ptr(float *t_angs, size_t block_size=256);
   size_t get_num_of_active_joints();
   size_t get_num_of_joints();
+  size_t get_num_of_robots();
 
 private:
   JointTreePtr root, tip;
