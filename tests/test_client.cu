@@ -26,7 +26,7 @@ int main() {
   cudaMalloc(&d_angs, h_angs.size() * sizeof(float));
   cudaMemcpy(d_angs, h_angs.data(), h_angs.size() * sizeof(float), cudaMemcpyHostToDevice);
   torch::Tensor t_angs = torch::from_blob(d_angs, {h_angs.size()});
-  float *result_ptr = fk.forward_kinematics_pytorch(t_angs.data_ptr<float>(), num_of_robots);
+  float *result_ptr = fk.forward_kinematics_raw_ptr(t_angs.data_ptr<float>(), num_of_robots);
   auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
   long sz = fk.get_num_of_active_joints()*6;
   torch::Tensor result = torch::from_blob(result_ptr, {sz}, options);

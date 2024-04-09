@@ -57,7 +57,7 @@ Eigen::Ref<Eigen::VectorXf> FastKinematics::jacobian_world_frame(Eigen::Ref<Eige
   return h_jac_result;
 }
 
-float *FastKinematics::forward_kinematics_pytorch(float *t_angs, size_t block_size) {
+float *FastKinematics::forward_kinematics_raw_ptr(float *t_angs, size_t block_size) {
   // first check the shape of the input tensor
   dim3 grid((num_of_robots+(block_size-1))/block_size);
   dim3 block(block_size);
@@ -69,7 +69,7 @@ float *FastKinematics::forward_kinematics_pytorch(float *t_angs, size_t block_si
   return d_result;
 }
 
-float *FastKinematics::jacobian_mixed_frame_pytorch(float *t_angs, size_t block_size) {
+float *FastKinematics::jacobian_mixed_frame_raw_ptr(float *t_angs, size_t block_size) {
   // first check the shape of the input tensor
   dim3 grid((num_of_robots+(block_size-1))/block_size);
   dim3 block(block_size);
@@ -81,7 +81,7 @@ float *FastKinematics::jacobian_mixed_frame_pytorch(float *t_angs, size_t block_
   return d_result;
 }
 
-float *FastKinematics::jacobian_world_frame_pytorch(float *t_angs, size_t block_size) {
+float *FastKinematics::jacobian_world_frame_raw_ptr(float *t_angs, size_t block_size) {
   // first check the shape of the input tensor
   dim3 grid((num_of_robots+(block_size-1))/block_size);
   dim3 block(block_size);

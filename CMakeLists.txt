@@ -7,6 +7,9 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3 -g3 -Wall -Werror -fsized-deallocation -Wno-dep
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -fPIC")
 set(CMAKE_CUDA_FLAGS "${CMAKE_CUDA_FLAGS} -O2 -fPIC")
 set(CMAKE_CUDA_RUNTIME_LIBRARY Static)
+# important or else we get "undefined symbol: fatbinData"
+# https://github.com/pybind/pybind11/issues/4825
+set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
 set(TORCH_CUDA_ARCH_LIST "5.0 6.1 8.0 8.6 8.9 9.0")
 
@@ -28,6 +31,7 @@ add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
 
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
+find_package(CUDAToolkit REQUIRED)
 find_package(Torch REQUIRED)
 find_library(TORCH_PYTHON_LIBRARY torch_python PATH "${TORCH_INSTALL_PREFIX}/lib")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
@@ -53,8 +57,9 @@ target_link_libraries(parser PRIVATE urdfdom_model tinyxml2 console_bridge)
 # then make core kinematics library
 add_library(kinematics src/kinematics.cu src/fast_kinematics.cu)
 set_target_properties(kinematics PROPERTIES CUDA_ARCHITECTURES "52;61")
+set_target_properties(kinematics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_compile_options(kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
-target_link_libraries(kinematics PRIVATE parser)
+target_link_libraries(kinematics PRIVATE parser CUDA::cudart_static)
 
 add_executable(test_client tests/test_client.cu)
 set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES "52;61")
