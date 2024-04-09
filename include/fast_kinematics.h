@@ -2,7 +2,6 @@
 
 #include <string>
 #include <Eigen/Core>
-#include <torch/torch.h>
 #include <parser.h>
 
 class FastKinematics {
@@ -13,11 +12,12 @@ public:
   Eigen::Ref<Eigen::VectorXf> forward_kinematics(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
   Eigen::Ref<Eigen::VectorXf> jacobian_mixed_frame(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
   Eigen::Ref<Eigen::VectorXf> jacobian_world_frame(Eigen::Ref<Eigen::VectorXf> h_angs, size_t block_size=256);
-  torch::Tensor forward_kinematics_pytorch(torch::Tensor t_angs, size_t block_size=256);
-  torch::Tensor jacobian_mixed_frame_pytorch(torch::Tensor t_angs, size_t block_size=256);
-  torch::Tensor jacobian_world_frame_pytorch(torch::Tensor t_angs, size_t block_size=256);
+  float *forward_kinematics_raw_ptr(float *t_angs, size_t block_size=256);
+  float *jacobian_mixed_frame_raw_ptr(float *t_angs, size_t block_size=256);
+  float *jacobian_world_frame_raw_ptr(float *t_angs, size_t block_size=256);
   size_t get_num_of_active_joints();
   size_t get_num_of_joints();
+  size_t get_num_of_robots();
 
 private:
   JointTreePtr root, tip;

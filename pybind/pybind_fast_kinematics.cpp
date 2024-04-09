@@ -1,5 +1,6 @@
 #include <pybind11/numpy.h>
 #include <pybind11/eigen.h>
+#include <torch/torch.h>
 #include <torch/extension.h>
 #include <fast_kinematics.h>
 
@@ -20,12 +21,25 @@ PYBIND11_MODULE(fast_kinematics, m) {
          py::arg("h_angs"), py::arg("block_size")=256)
     .def("jacobian_world_frame", &FastKinematics::jacobian_world_frame,
          py::arg("h_angs"), py::arg("block_size")=256)
-    .def("forward_kinematics_pytorch", &FastKinematics::forward_kinematics_pytorch,
-         py::arg("t_angs"), py::arg("block_size")=256)
-    .def("jacobian_mixed_frame_pytorch", &FastKinematics::jacobian_mixed_frame_pytorch,
-         py::arg("h_angs"), py::arg("block_size")=256)
-    .def("jacobian_world_frame_pytorch", &FastKinematics::jacobian_world_frame_pytorch,
-         py::arg("h_angs"), py::arg("block_size")=256)
+    .def("forward_kinematics_pytorch", [](FastKinematics &fk, torch::Tensor t_angs) {
+      auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
+      float *d_result = fk.forward_kinematics_raw_ptr(t_angs.data_ptr<float>());
+      long int sz = fk.get_num_of_robots() * 7;
+      return torch::from_blob(d_result, {sz}, options);
+    })
+    .def("jacobian_mixed_frame_pytorch", [](FastKinematics &fk, torch::Tensor t_angs) {
+      auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
+      float *d_result = fk.jacobian_mixed_frame_raw_ptr(t_angs.data_ptr<float>());
+      long int sz = fk.get_num_of_robots() * fk.get_num_of_active_joints() * 6;
+      return torch::from_blob(d_result, {sz}, options);
+    })
+    .def("jacobian_world_frame_pytorch", [](FastKinematics &fk, torch::Tensor t_angs) {
+      auto options = torch::TensorOptions().dtype(torch::kFloat32).device(torch::kCUDA, 0).pinned_memory(true);
+      float *d_result = fk.jacobian_world_frame_raw_ptr(t_angs.data_ptr<float>());
+      long int sz = fk.get_num_of_robots() * fk.get_num_of_active_joints() * 6;
+      return torch::from_blob(d_result, {sz}, options);
+    })
     .def("get_num_of_active_joints", &FastKinematics::get_num_of_active_joints)
-    .def("get_num_of_joints", &FastKinematics::get_num_of_joints);
+    .def("get_num_of_joints", &FastKinematics::get_num_of_joints)
+    .def("get_num_of_robots", &FastKinematics::get_num_of_robots);
 }
