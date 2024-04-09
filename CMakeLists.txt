@@ -15,9 +15,6 @@ set(TORCH_CUDA_ARCH_LIST "5.0 6.1 8.0 8.6 8.9 9.0")
 
 # find torch if no explicit path is given
 if(NOT DEFINED CMAKE_PREFIX_PATH)
-  if(NOT DEFINED PYTHON_EXECUTABLE)
-    find_program(PYTHON_EXECUTABLE python3)
-  endif()
   execute_process(
     COMMAND python3.10 -c "import torch;print(torch.utils.cmake_prefix_path)"
     OUTPUT_VARIABLE CMAKE_PREFIX_PATH
