@@ -38,6 +38,9 @@ pip install fast_kinematics
 > [!WARNING]
 > Please use dtype `np.float32` or `torch.float32` for the joint configuration. The library is optimized for `float32` and will not work with `float64`.
 
+> [!NOTE]
+> You might need to import torch before using this library as torch will load the shared libraries. Your mileage may vary.
+
 Minimal numpy example:
   
   ```python
@@ -82,4 +85,5 @@ There is also a jupyter notebook in the `tests` folder that contains usage as we
 
 ## APIs
 
-Please see `pybind11/fast_kinematics.pyi` for the API documentation.
+The docs are embedded in the library itself, you can either print out the doc string or use the code suggestions in your IDE to see the API documentation.
+Alternatively, please see `pybind11/pybind_fast_kinematics.cpp` for the API documentation.

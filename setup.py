@@ -82,5 +82,4 @@ setup(
   python_requires=">=3.8",
   home_page="https://github.com/Lexseal/fast_kinematics",
   license="MIT",
-  package_data={"fast_kinematics": ["pybind/fast_kinematics.pyi"]},
 )
