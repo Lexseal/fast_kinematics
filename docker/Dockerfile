@@ -4,7 +4,16 @@ FROM quay.io/pypa/manylinux2014_x86_64
 RUN yum update -y && yum install -y wget git && yum upgrade -y && yum clean all
 WORKDIR /workspace
 
+# get oh my zsh
+RUN yum install -y zsh && \
+    sh -c -y "$(wget -O- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+
 # get cuda
+RUN yum-config-manager --add-repo https://developer.download.nvidia.com/compute/cuda/repos/rhel7/x86_64/cuda-rhel7.repo && \
+    yum clean all && \
+    yum -y install cuda-toolkit-12-4 && \
+    echo 'export PATH=/usr/local/cuda-12.4/bin${PATH:+:${PATH}}' >> ~/.zshrc && \
+    echo 'export LD_LIBRARY_PATH=/usr/local/cuda-12.4/lib64${LD_LIBRARY_PATH:+:${LD_LIBRARY_PATH}}' >> ~/.zshrc
 
 # Eigen
 RUN git clone --single-branch -b 3.4.0 --depth 1 https://gitlab.com/libeigen/eigen.git && \
