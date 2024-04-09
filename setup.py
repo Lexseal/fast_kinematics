@@ -18,9 +18,9 @@ class CMakeExtension(Extension):
 class CMakeBuild(build_ext):
   def build_extension(self, ext: CMakeExtension) -> None:
 
-    # install numpy and pytorch
-    subprocess.run([sys.executable, "-m", "pip", "install", "numpy"])
-    subprocess.run([sys.executable, "-m", "pip", "install", "torch"])
+    # install numpy and pytorch for the CMake build
+    subprocess.run(["python3.10", "-m", "pip", "install", "numpy"])
+    subprocess.run(["python3.10", "-m", "pip", "install", "torch"])
 
     # Must be in this form due to bug in .resolve() only fixed in Python 3.10+
     ext_fullpath = Path.cwd() / self.get_ext_fullpath(ext.name)
@@ -67,7 +67,7 @@ class CMakeBuild(build_ext):
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
   name="fast_kinematics",
-  version="0.0.1",
+  version="0.2.0",
   author="Xinsong Lin",
   author_email="x8lin@ucsd.edu",
   description="A fast kinematics library for robotics",
