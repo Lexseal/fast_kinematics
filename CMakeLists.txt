@@ -66,4 +66,5 @@ target_link_libraries(test_client PRIVATE kinematics "${TORCH_LIBRARIES}")
 # include pybind11
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/extern/pybind11")
 pybind11_add_module(fast_kinematics pybind/pybind_fast_kinematics.cpp)
-target_link_libraries(fast_kinematics PRIVATE kinematics "${TORCH_PYTHON_LIBRARY}" "${TORCH_LIBRARIES}")
+# link torch and torch_python without any cuda stuff
+target_link_libraries(fast_kinematics PRIVATE kinematics torch torch_library "${TORCH_PYTHON_LIBRARY}")

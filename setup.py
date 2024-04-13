@@ -69,7 +69,7 @@ long_description = (this_directory / "readme.md").read_text()
 # logic and declaration, and simpler if you include description/version in a file.
 setup(
     name="fast_kinematics",
-    version="0.2.1",
+    version="0.2.2",
     author="Xinsong Lin",
     author_email="x8lin@ucsd.edu",
     description="A fast kinematics library for robotics",
