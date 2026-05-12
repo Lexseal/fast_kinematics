@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.24)
 project(fast_kinematics LANGUAGES CXX CUDA)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CUDA_STANDARD 17)
@@ -11,20 +11,21 @@ set(CMAKE_CUDA_RUNTIME_LIBRARY Static)
 # https://github.com/pybind/pybind11/issues/4825
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION OFF)
 
-set(TORCH_CUDA_ARCH_LIST "5.0 6.1 8.0 8.6 8.9 9.0")
+set(TORCH_CUDA_ARCH_LIST "8.0 8.6 8.7 8.9 9.0 10.0 11.0 12.1")
 
 # find torch if no explicit path is given
 if(NOT DEFINED CMAKE_PREFIX_PATH)
   execute_process(
-    COMMAND python3.10 -c "import torch;print(torch.utils.cmake_prefix_path)"
+    COMMAND python3 -c "import torch;print(torch.utils.cmake_prefix_path)"
     OUTPUT_VARIABLE CMAKE_PREFIX_PATH
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 endif()
 
-# torch requires pre-C++11 ABI
-# may or may not be necessary here but doesn't hurt
-add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=0)
+add_compile_definitions(_GLIBCXX_USE_CXX11_ABI=1)
+
+set(PYBIND11_FINDPYTHON ON)
+find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
 
 find_package(Eigen3 REQUIRED)
 find_package(urdfdom REQUIRED)
@@ -53,13 +54,13 @@ target_link_libraries(parser PRIVATE urdfdom_model tinyxml2 console_bridge)
 
 # then make core kinematics library
 add_library(kinematics src/kinematics.cu src/fast_kinematics.cu)
-set_target_properties(kinematics PROPERTIES CUDA_ARCHITECTURES "52;61")
+set_target_properties(kinematics PROPERTIES CUDA_ARCHITECTURES "80;86;87;89;90;100;110;121")
 set_target_properties(kinematics PROPERTIES CUDA_SEPARABLE_COMPILATION ON)
 target_compile_options(kinematics PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
 target_link_libraries(kinematics PRIVATE parser CUDA::cudart_static)
 
 add_executable(test_client tests/test_client.cu)
-set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES "52;61")
+set_target_properties(test_client PROPERTIES CUDA_ARCHITECTURES "80;86;89;90;100;110;121")
 target_compile_options(test_client PRIVATE --expt-relaxed-constexpr -diag-suppress 20012,20236)
 target_link_libraries(test_client PRIVATE kinematics "${TORCH_LIBRARIES}")
 
